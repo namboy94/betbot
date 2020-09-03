@@ -18,34 +18,31 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import Dict, Any
-from dataclasses import dataclass
 
 
-@dataclass
 class Match:
     """
     Class that encapsulates information about a Match
     """
 
-    id: int
-    """
-    The ID of the match
-    """
-
-    matchday: int
-    """
-    The matchday of the match
-    """
-
-    home_team: str
-    """
-    The name of the home team
-    """
-
-    away_team: str
-    """
-    The name of the away team
-    """
+    def __init__(
+            self,
+            _id: int,
+            matchday: int,
+            home_team: str,
+            away_team: str
+    ):
+        """
+        Initializes the Match
+        :param _id: The ID of the match
+        :param matchday: The matchday of the match
+        :param home_team: The name of the home team
+        :param away_team: The name of the away team
+        """
+        self.id = _id
+        self.matchday = matchday
+        self.home_team = home_team
+        self.away_team = away_team
 
     @classmethod
     def from_json(cls, json_data: Dict[str, Any]):

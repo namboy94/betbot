@@ -18,28 +18,23 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import Dict
-from dataclasses import dataclass
 
 
-@dataclass
 class Bet:
     """
     Class that encapsulates Bet information
     """
-    match_id: int
-    """
-    The ID of the associated match
-    """
 
-    home_score: int
-    """
-    The score bet on the home team
-    """
-
-    away_score: int
-    """
-    The score bet on the away team
-    """
+    def __init__(self, match_id: int, home_score: int, away_score: int):
+        """
+        Initializes the Bet
+        :param match_id: The ID of the associated match
+        :param home_score: The score bet on the home team
+        :param away_score: The score bet on the away team
+        """
+        self.match_id = match_id
+        self.home_score = home_score
+        self.away_score = away_score
 
     def to_dict(self) -> Dict[str, int]:
         """
