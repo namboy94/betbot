@@ -1,0 +1,8 @@
+version: "3.2"
+services:
+  app:
+    build: .
+    image: "betbot"
+    container_name: "betbot"
+    env_file: .env
+    restart: always
