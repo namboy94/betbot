@@ -19,8 +19,11 @@ along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import argparse
+import time
 from puffotter.init import cli_start, argparse_add_verbosity
 from betbot import sentry_dsn
+from betbot.api.ApiConnection import ApiConnection
+from betbot.prediction import predictors
 
 
 def main(args: argparse.Namespace):
@@ -29,13 +32,27 @@ def main(args: argparse.Namespace):
     :param args: The command line arguments
     :return: None
     """
+    predictor_map = {
+        x.name(): x for x in predictors
+    }
+    predictor = predictor_map[args.predictor]()
+    api = ApiConnection(args.username, args.password, args.url)
 
+    while True:
+        matches = api.get_current_matchday_matches()
+        bets = predictor.predict(matches)
+        api.place_bets(bets)
+        time.sleep(60)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+
+    predictor_names = {x.name() for x in predictors}
+    parser.add_argument("predictor", choices=predictor_names)
     parser.add_argument("username")
     parser.add_argument("password")
     parser.add_argument("url", default="https://hk-tippspiel.com")
+
     argparse_add_verbosity(parser)
     cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

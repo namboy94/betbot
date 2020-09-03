@@ -24,6 +24,7 @@ from dataclasses import dataclass
 @dataclass
 class Match:
     id: int
+    matchday: int
     home_team: str
     away_team: str
 
@@ -31,6 +32,7 @@ class Match:
     def from_json(cls, json_data: Dict[str, Any]):
         return cls(
             json_data["id"],
+            json_data["matchday"],
             json_data["home_team"]["abbreviation"],
             json_data["away_team"]["abbreviation"]
         )

@@ -16,3 +16,17 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
+
+from typing import List
+from betbot.api.Match import Match
+from betbot.api.Bet import Bet
+
+
+class Predictor:
+
+    @classmethod
+    def name(cls) -> str:
+        raise NotImplementedError()
+
+    def predict(self, matches: List[Match]) -> List[Bet]:
+        raise NotImplementedError()
