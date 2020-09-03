@@ -23,13 +23,37 @@ from dataclasses import dataclass
 
 @dataclass
 class Match:
+    """
+    Class that encapsulates information about a Match
+    """
+
     id: int
+    """
+    The ID of the match
+    """
+
     matchday: int
+    """
+    The matchday of the match
+    """
+
     home_team: str
+    """
+    The name of the home team
+    """
+
     away_team: str
+    """
+    The name of the away team
+    """
 
     @classmethod
     def from_json(cls, json_data: Dict[str, Any]):
+        """
+        Generates a Match object from JSON data
+        :param json_data: The JSON data
+        :return: The generated Match
+        """
         return cls(
             json_data["id"],
             json_data["matchday"],

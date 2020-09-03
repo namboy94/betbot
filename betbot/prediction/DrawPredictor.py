@@ -17,35 +17,33 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Dict
-from dataclasses import dataclass
+import random
+from typing import List
+from betbot.api.Bet import Bet
+from betbot.api.Match import Match
+from betbot.prediction.Predictor import Predictor
 
 
-@dataclass
-class Bet:
+class DrawPredictor(Predictor):
     """
-    Class that encapsulates Bet information
-    """
-    match_id: int
-    """
-    The ID of the associated match
+    Class that always predicts 0:0, 1:1, 2:2 or 3:3
     """
 
-    home_score: int
-    """
-    The score bet on the home team
-    """
-
-    away_score: int
-    """
-    The score bet on the away team
-    """
-
-    def to_dict(self) -> Dict[str, int]:
+    @classmethod
+    def name(cls) -> str:
         """
-        :return: A dictionary that canbe used to place the bet using the API
+        :return: The name of the predictor
         """
-        return {
-            f"{self.match_id}-home": self.home_score,
-            f"{self.match_id}-away": self.away_score
-        }
+        return "draw"
+
+    def predict(self, matches: List[Match]) -> List[Bet]:
+        """
+        Performs the prediction
+        :param matches: The matches to predict
+        :return: The predictions as Bet objects
+        """
+        bets = []
+        for match in matches:
+            goals = random.randint(0, 3)
+            bets.append(Bet(match.id, goals, goals))
+        return bets

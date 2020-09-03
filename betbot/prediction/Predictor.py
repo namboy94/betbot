@@ -23,10 +23,21 @@ from betbot.api.Bet import Bet
 
 
 class Predictor:
+    """
+    Class that specifies required methods for predictor objects
+    """
 
     @classmethod
     def name(cls) -> str:
+        """
+        :return: The name of the predictor
+        """
         raise NotImplementedError()
 
     def predict(self, matches: List[Match]) -> List[Bet]:
+        """
+        Performs the prediction
+        :param matches: The matches to predict
+        :return: The predictions as Bet objects
+        """
         raise NotImplementedError()

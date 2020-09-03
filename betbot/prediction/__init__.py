@@ -19,8 +19,10 @@ LICENSE"""
 
 from typing import Type, List
 from betbot.prediction.Predictor import Predictor
+from betbot.prediction.DrawPredictor import DrawPredictor
 from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
 
 predictors: List[Type[Predictor]] = [
+    DrawPredictor,
     TipicoOddsPredictor
 ]

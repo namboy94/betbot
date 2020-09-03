@@ -27,27 +27,48 @@ from betbot.prediction.Predictor import Predictor
 
 
 class TipicoOddsPredictor(Predictor):
+    """
+    Class that determinalistically predicts matches based on Tipico quotes
+    """
 
     @classmethod
     def name(cls) -> str:
+        """
+        :return: The name of the predictor
+        """
         return "tipico-odds"
 
     def predict(self, matches: List[Match]) -> List[Bet]:
+        """
+        Performs the prediction
+        :param matches: The matches to predict
+        :return: The predictions as Bet objects
+        """
         tipico = self.load_tipico_data(matches[0].matchday)
         bets = []
 
         for home_team, away_team, home_odds, draw_odds, away_odds in tipico:
             for match in matches:
 
-                if home_team == match.home_team and away_team == match.away_team:
-                    bets.append(self.generate_bet(match.id, home_odds, draw_odds, away_odds))
+                if home_team == match.home_team \
+                        and away_team == match.away_team:
+                    bet = self.generate_bet(
+                        match.id, home_odds, draw_odds, away_odds
+                    )
+                    bets.append(bet)
 
         return bets
 
-
-
+    # noinspection PyMethodMayBeStatic
     def load_tipico_data(self, matchday: int) \
             -> List[Tuple[str, str, float, float, float]]:
+        """
+        Loads tipico quote data for the 2020/21 bundesliga season
+        :param matchday: The matchday for which to retrieve the data
+        :return: The quote data as a list of tuples of the form:
+                    home team name, away team name,
+                    home win odds, draw odds, away win odds
+        """
         tipico_data = []
         url = f"https://s5.sir.sportradar.com/tipico/de/1/season" \
               f"/77189/fixtures/round/21-{matchday}"
@@ -75,6 +96,7 @@ class TipicoOddsPredictor(Predictor):
             tipico_data.append((home, away, home_odds, draw_odds, away_odds))
         return tipico_data
 
+    # noinspection PyMethodMayBeStatic
     def generate_bet(
             self,
             match_id: int,
@@ -82,7 +104,14 @@ class TipicoOddsPredictor(Predictor):
             draw_odds: float,
             away_odds: float
     ) -> Bet:
-
+        """
+        Generates a Bet based on the quote data
+        :param match_id: The ID of the match to vote on
+        :param home_odds: The odds that the home team wins
+        :param draw_odds: The odds that the match ends in a draw
+        :param away_odds: The odds that the away team wins
+        :return: The generated bet
+        """
         winner = int(sqrt(abs(home_odds - away_odds) * 2))
         loser = int(min(home_odds, away_odds) - 1)
 
