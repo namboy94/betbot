@@ -53,6 +53,17 @@ docgen:
   script:
     - sphinx-docgen
 
+deploy_app:
+  stage: deploy
+  tags: [privileged]
+  only: [master]
+  before_script: []
+  script:
+    - echo "$ENV_FILE" > .env
+    - docker-compose build
+    - docker-compose up -d
+    - rm .env
+
 release_upload:
   stage: release
   only: [master]

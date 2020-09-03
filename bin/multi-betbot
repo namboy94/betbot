@@ -18,30 +18,51 @@ You should have received a copy of the GNU General Public License
 along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import os
+import time
 import argparse
+import logging
+from threading import Thread
 from betbot import sentry_dsn
 from betbot.prediction import predictors
 from betbot.main import main as betbot_main
 from puffotter.init import cli_start, argparse_add_verbosity
 
 
-def main(args: argparse.Namespace):
+def main(_: argparse.Namespace):
     """
     The main function of the betbot
-    :param args: The command line arguments
+    :param _: The command line arguments
     :return: None
     """
-    betbot_main(args.predictor, args.username, args.password, args.url)
+    tippspiel_url = os.environ.get("TIPPSPIEL_URL", "https://hk-tippspiel.com")
+    threads = []
+
+    for predictor in predictors:
+        base = predictor.name().upper().replace("-", "_")
+        user_key = base + "_USER"
+        pass_key = base + "_PASS"
+        username = os.environ.get(user_key)
+        password = os.environ.get(pass_key)
+        if username is None or password is None:
+            continue
+        else:
+            threads.append(Thread(
+                target=betbot_main,
+                args=(predictor.name(), username, password, tippspiel_url)
+            ))
+
+    if len(threads) == 0:
+        logging.warning("No betbots started")
+
+    for thread in threads:
+        thread.start()
+        time.sleep(5)
+    for thread in threads:
+        thread.join()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-
-    predictor_names = {x.name() for x in predictors}
-    parser.add_argument("predictor", choices=predictor_names)
-    parser.add_argument("username")
-    parser.add_argument("password")
-    parser.add_argument("url", default="https://hk-tippspiel.com")
-
     argparse_add_verbosity(parser)
     cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

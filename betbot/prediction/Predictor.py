@@ -17,8 +17,27 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from typing import List
+from betbot.api.Match import Match
+from betbot.api.Bet import Bet
 
-sentry_dsn = "https://bf9dc130ba4c4284a42813a0032b63fe@sentry.namibsun.net/21"
-"""
-The sentry DSN used for exception logging
-"""
+
+class Predictor:
+    """
+    Class that specifies required methods for predictor objects
+    """
+
+    @classmethod
+    def name(cls) -> str:
+        """
+        :return: The name of the predictor
+        """
+        raise NotImplementedError()
+
+    def predict(self, matches: List[Match]) -> List[Bet]:
+        """
+        Performs the prediction
+        :param matches: The matches to predict
+        :return: The predictions as Bet objects
+        """
+        raise NotImplementedError()

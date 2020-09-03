@@ -17,8 +17,12 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from typing import Type, List
+from betbot.prediction.Predictor import Predictor
+from betbot.prediction.DrawPredictor import DrawPredictor
+from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
 
-sentry_dsn = "https://bf9dc130ba4c4284a42813a0032b63fe@sentry.namibsun.net/21"
-"""
-The sentry DSN used for exception logging
-"""
+predictors: List[Type[Predictor]] = [
+    DrawPredictor,
+    TipicoOddsPredictor
+]

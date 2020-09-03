@@ -9,4 +9,4 @@ ADD . bot
 RUN cd bot && python3 setup.py install
 
 WORKDIR bot
-CMD ["/usr/bin/python3", "bin/betbot"]
+CMD ["multi-betbot", "-v"]
