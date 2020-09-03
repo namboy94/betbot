@@ -18,10 +18,24 @@ You should have received a copy of the GNU General Public License
 along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import argparse
+from puffotter.init import cli_start, argparse_add_verbosity
+from betbot import sentry_dsn
 
-def main():
-    pass
+
+def main(args: argparse.Namespace):
+    """
+    The main function of the betbot
+    :param args: The command line arguments
+    :return: None
+    """
+
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("username")
+    parser.add_argument("password")
+    parser.add_argument("url", default="https://hk-tippspiel.com")
+    argparse_add_verbosity(parser)
+    cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

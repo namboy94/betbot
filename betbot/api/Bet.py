@@ -17,8 +17,18 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from typing import Dict
+from dataclasses import dataclass
 
-sentry_dsn = "https://bf9dc130ba4c4284a42813a0032b63fe@sentry.namibsun.net/21"
-"""
-The sentry DSN used for exception logging
-"""
+
+@dataclass
+class Bet:
+    match_id: int
+    home_score: int
+    away_score: int
+
+    def to_dict(self) -> Dict[str, int]:
+        return {
+            f"{self.match_id}-home": self.home_score,
+            f"{self.match_id}-away": self.away_score
+        }

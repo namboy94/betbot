@@ -41,7 +41,8 @@ if __name__ == "__main__":
         scripts=list(map(lambda x: os.path.join("bin", x), os.listdir("bin"))),
         install_requires=[
             "requests",
-            "beautifulsoup4"
+            "beautifulsoup4",
+            "puffotter"
         ],
         include_package_data=True,
         zip_safe=False
