@@ -53,18 +53,27 @@ class ApiConnection:
         """
         return {"Authorization": "Basic " + self.api_key}
 
-    def login(self):
+    def login(self) -> bool:
         """
         Retrieves an API Key using a username and password if no key
         has been retrieved yet or if the existing key has expired
-        :return: None
+        :return: True if the login was successfulle
         """
         if not self.authorized():
             self.logger.info("Requesting new API Key")
             creds = {"username": self.username, "password": self.password}
             data = self.execute_api_call("key", "POST", False, creds)
-            api_key = data["data"]["api_key"]
-            self.api_key = b64encode(api_key.encode("utf-8")).decode("utf-8")
+
+            if data["status"] != "ok":
+                self.logger.warning("Login attempt failed")
+                return False
+            else:
+                api_key = data["data"]["api_key"]
+                encoded = b64encode(api_key.encode("utf-8"))
+                self.api_key = encoded.decode("utf-8")
+                return True
+        else:
+            return True
 
     def authorized(self) -> bool:
         """
@@ -116,7 +125,9 @@ class ApiConnection:
         :return: The response JSON
         """
         if authorization_required and endpoint != "authorize":
-            self.login()
+            logged_in = self.login()
+            if not logged_in:
+                return {"status": "error"}
 
         extras = {}
         if authorization_required:
