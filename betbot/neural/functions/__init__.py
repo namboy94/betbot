@@ -16,25 +16,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
-
-from typing import List
-from betbot.neural.components.Layer import Layer
-
-
-class FullyConnectedLayer(Layer):
-    """
-    Class that models a fully connected layer in a neural network
-    """
-
-    def execute(
-            self,
-            input_data: List[float],
-            weights: List[List[float]]
-    ) -> List[float]:
-        outputs = []
-        for i in range(0, self.outputs):
-            neuron = self.neurons[i]
-            neuron_weights = weights[i]
-            outputs.append(neuron.execute(input_data, neuron_weights))
-
-        return outputs

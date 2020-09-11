@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Callable, List
+from typing import List
 from betbot.neural.components.Neuron import Neuron
+from betbot.neural.functions.Function import Function
 
 
 class Layer:
@@ -30,7 +31,7 @@ class Layer:
             self,
             inputs: int,
             outputs: int,
-            activation_function: Callable[[float], float],
+            activation_function: Function,
             has_bias: bool
     ):
         self.inputs = inputs

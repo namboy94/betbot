@@ -18,23 +18,23 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import List
-from betbot.neural.functions.Function import Function
+from betbot.neural.layer.Layer import Layer
 
 
-class Neuron:
+class FullyConnectedLayer(Layer):
     """
-    Class that models a neuron in a neural network
+    Class that models a fully connected layer in a neural network
     """
 
-    def __init__(self, activation_function: Function):
-        self.activation_function = activation_function
-        self.last_output = 0.0
+    def execute(
+            self,
+            input_data: List[float],
+            weights: List[List[float]]
+    ) -> List[float]:
+        outputs = []
+        for i in range(0, self.outputs):
+            neuron = self.neurons[i]
+            neuron_weights = weights[i]
+            outputs.append(neuron.execute(input_data, neuron_weights))
 
-    def execute(self, input_data: List[float], weights: List[float]) -> float:
-        summed = 0.0
-        for i in range(0, len(input_data)):
-            data = input_data[i]
-            weight = weights[i]
-            summed += data * weight
-        self.last_output = self.activation_function.activation(summed)
-        return self.last_output
+        return outputs

@@ -19,8 +19,8 @@ LICENSE"""
 
 import json
 import random
-from typing import List, Optional
-from betbot.neural.components.Layer import Layer
+from typing import List, Optional, Tuple
+from betbot.neural.layer.Layer import Layer
 
 
 class NeuralNetworkFramework:
@@ -45,17 +45,45 @@ class NeuralNetworkFramework:
         else:
             self.weights = initial_weights
 
-    def train(self):
+    def train(
+            self,
+            labelled_data: List[Tuple[List[float], float]],
+            learning_rate: float,
+            epochs: int
+    ):
         raise NotImplementedError()
+
+    @staticmethod
+    def split_labelled_data(
+            labelled_data: List[Tuple[List[float], List[float]]]
+    ) -> Tuple[
+        List[Tuple[List[float], List[float]]],
+        List[Tuple[List[float], List[float]]],
+        List[Tuple[List[float], List[float]]]
+    ]:
+        random.shuffle(labelled_data)
+
+        border_0 = 0
+        border_1 = int(len(labelled_data) / 2)
+        border_2 = int(3 * len(labelled_data) / 4)
+        border_3 = len(labelled_data)
+
+        training_data = labelled_data[border_0:border_1]
+        validation_data = labelled_data[border_1:border_2]
+        test_data = labelled_data[border_2:border_3]
+
+        return training_data, validation_data, test_data
 
     def classify(self, inputs: List[float]) -> List[float]:
         for i, layer in enumerate(self.layers):
+            if layer.has_bias:
+                inputs = [1.0] + inputs
             inputs = layer.execute(inputs, self.weights[i])
         return inputs
 
     def save_weights(self, file_path: str):
         with open(file_path, "w") as f:
-            json.dump({"weights": self.weights}, f)
+            json.dump({"weights": self.weights}, f, indent=4)
 
 """
 Inputs:

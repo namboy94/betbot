@@ -17,24 +17,11 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List
-from betbot.neural.functions.Function import Function
 
+class Function:
 
-class Neuron:
-    """
-    Class that models a neuron in a neural network
-    """
+    def activation(self, x: float) -> float:
+        raise NotImplementedError()
 
-    def __init__(self, activation_function: Function):
-        self.activation_function = activation_function
-        self.last_output = 0.0
-
-    def execute(self, input_data: List[float], weights: List[float]) -> float:
-        summed = 0.0
-        for i in range(0, len(input_data)):
-            data = input_data[i]
-            weight = weights[i]
-            summed += data * weight
-        self.last_output = self.activation_function.activation(summed)
-        return self.last_output
+    def derivative(self, x: float) -> float:
+        raise NotImplementedError()
