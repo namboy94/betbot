@@ -18,7 +18,7 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import List, TYPE_CHECKING
-from betbot.neural.functions.Function import Function
+from betbot.neural.functions.ActivationFunction import ActivationFunction
 if TYPE_CHECKING:
     from betbot.neural.components.Weights import Weights
 
@@ -32,7 +32,7 @@ class Neuron:
             self,
             index: int,
             layer_index: int,
-            activation_function: Function,
+            activation_function: ActivationFunction,
             input_count: int
     ):
         """

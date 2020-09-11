@@ -25,6 +25,7 @@ from typing import List, Optional, Tuple
 from betbot.neural.layer.Layer import Layer
 from betbot.neural.components.Weights import Weights
 from betbot.neural.data.LabelledData import LabelledData
+from betbot.neural.functions.ErrorFunction import ErrorFunction
 
 
 class NeuralNetworkFramework:
@@ -35,11 +36,13 @@ class NeuralNetworkFramework:
     def __init__(
             self,
             layers: List[Layer],
+            error_function: ErrorFunction,
             model_file: Optional[str] = None
     ):
         """
         Initializes the neural network
         :param layers: The layers of the network
+        :param error_function: The error function to use
         :param model_file: Optional model file which contains previously
                            trained weights
         """
@@ -47,6 +50,7 @@ class NeuralNetworkFramework:
         self.layers = layers
         for i, layer in enumerate(self.layers):
             layer.index = i
+        self.error_function = error_function
         self.weights = self.load_weights(model_file)
 
     def load_weights(self, model_file: Optional[str]) -> Weights:
@@ -90,6 +94,22 @@ class NeuralNetworkFramework:
         for i, layer in enumerate(self.layers):
             current_inputs = layer.feed_forward(current_inputs, self.weights)
         return current_inputs
+
+    def calculate_total_error(
+            self,
+            input_: List[float],
+            expected: List[float]
+    ) -> float:
+        """
+        Calculates the total error for an input with known results
+        :param input_: The input to check
+        :param expected: The label/known output
+        :return: The error calculated using the error function
+        """
+        return self.error_function.calculate_total_error(
+            self.classify(input_),
+            expected
+        )
 
     def save_model(self, model_file: str):
         """

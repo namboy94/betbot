@@ -121,3 +121,17 @@ class Weights:
         :return: The weights as a 3-dimensional matrix
         """
         return self._weights
+
+    def __str__(self) -> str:
+        """
+        :return: A string respresentation of the weights
+        """
+        string = ""
+        for layer in self._layers:
+            string += f"Layer {layer.index}:\n"
+            for neuron in layer.neurons:
+                neuron_weights = self.get_neuron_weights(neuron)
+                for weight in neuron_weights:
+                    string += f"{weight:.2f} "
+                string += "\n"
+        return string

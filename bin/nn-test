@@ -1,23 +1,32 @@
 from betbot.neural.MLP import MLP
-from betbot.neural.functions.Sigmoid import Sigmoid
+from betbot.neural.functions.ReLu import ReLu
 from betbot.neural.layer.FullyConnectedLayer import FullyConnectedLayer
 from betbot.neural.data.LabelledData import LabelledData
 
 
 layers = [
-    FullyConnectedLayer(8, 4, Sigmoid(), False),
-    FullyConnectedLayer(4, 2, Sigmoid(), True),
-    FullyConnectedLayer(2, 1, Sigmoid(), False),
+    FullyConnectedLayer(4, 10, ReLu(), True),
+    FullyConnectedLayer(10, 4, ReLu(), True),
+    FullyConnectedLayer(4, 1, ReLu(), True),
 ]
 mlp = MLP(layers, None)
 
-data = [
-    LabelledData([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0], [0.15])
-    for x in range(10000)
-]
+data = []
+for i in range(1, 10):
+    for j in range(1, 10):
+        if i > j:
+            continue
+        data.append(LabelledData([float(i), float(j), float(i), float(j)], [i / j]))
+multiple_data = []
+for i in range(100):
+    multiple_data += data
+
+print("GO!")
+
 mlp.train(
-    data,
-    0.0001,
+    multiple_data,
+    0.01,
     50
 )
 mlp.save_model("/home/hermann/git/betbot/test.json")
+print(mlp.classify([1.0, 2.0, 3.0, 4.0]))

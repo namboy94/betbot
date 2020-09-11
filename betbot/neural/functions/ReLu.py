@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from betbot.neural.functions.ActivationFunction import ActivationFunction
 
-class Function:
+
+class ReLu(ActivationFunction):
     """
-    Class that models a function of the form R -> R (float -> float)
+    Class that implements the ReLu (Rectified Linear Unit) function
     """
 
     def function(self, x: float) -> float:
@@ -29,7 +31,7 @@ class Function:
         :param x: The input
         :return: The output
         """
-        raise NotImplementedError()
+        return max(0.0, x)
 
     def derivative(self, x: float) -> float:
         """
@@ -37,4 +39,7 @@ class Function:
         :param x: The input
         :return: The output
         """
-        raise NotImplementedError()
+        if x > 0.0:
+            return 1.0
+        else:
+            return 0.0

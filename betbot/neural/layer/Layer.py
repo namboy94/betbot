@@ -19,7 +19,7 @@ LICENSE"""
 
 from typing import List, TYPE_CHECKING
 from betbot.neural.components.Neuron import Neuron
-from betbot.neural.functions.Function import Function
+from betbot.neural.functions.ActivationFunction import ActivationFunction
 if TYPE_CHECKING:
     from betbot.neural.components.Weights import Weights
 
@@ -33,7 +33,7 @@ class Layer:
             self,
             inputs: int,
             outputs: int,
-            activation_function: Function,
+            activation_function: ActivationFunction,
             has_bias: bool
     ):
         """

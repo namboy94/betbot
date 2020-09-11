@@ -17,30 +17,23 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from math import exp
-from betbot.neural.functions.ActivationFunction import ActivationFunction
+from typing import List
 
 
-class Sigmoid(ActivationFunction):
+class ErrorFunction:
     """
-    Class that implements the sigmoid function
+    Class that models an error function
     """
 
-    def function(self, x: float) -> float:
+    def calculate_total_error(
+            self,
+            output: List[float],
+            expected: List[float]
+    ) -> float:
         """
-        Executes the function
-        :param x: The input
-        :return: The output
+        Calculates the total error for an output with known results
+        :param output: The output to check
+        :param expected: The label/known output
+        :return: The error calculated using the error function
         """
-        try:
-            return 1 / (1 + exp(-x))
-        except OverflowError:
-            return 0.0
-
-    def derivative(self, x: float) -> float:
-        """
-        Executes the derivative of the function
-        :param x: The input
-        :return: The output
-        """
-        return self.function(x) * (1 - self.function(x))
+        raise NotImplemented()

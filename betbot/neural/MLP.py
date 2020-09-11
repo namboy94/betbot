@@ -131,9 +131,11 @@ class MLP(NeuralNetworkFramework):
                     error = errors[layer_index][neuron_index]
                     new_weight = \
                         current_weight + learning_rate * error * input_data
+                    print(error)
                     self.weights.set_weight(
                         layer=layer_index,
                         neuron=neuron_index,
                         input_=i,
                         weight=new_weight
                     )
+        exit()
