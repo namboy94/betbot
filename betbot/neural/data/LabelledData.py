@@ -17,24 +17,19 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+from typing import List
 
-class Function:
+
+class LabelledData:
     """
-    Class that models a function of the form R -> R (float -> float)
+    Class that models labelled data used for supervised training
     """
 
-    def function(self, x: float) -> float:
+    def __init__(self, inputs: List[float], outputs: List[float]):
         """
-        Executes the function
-        :param x: The input
-        :return: The output
+        Initializes the labelled data
+        :param inputs: The inputs
+        :param outputs: The expected outputs
         """
-        raise NotImplementedError()
-
-    def derivative(self, x: float) -> float:
-        """
-        Executes the derivative of the function
-        :param x: The input
-        :return: The output
-        """
-        raise NotImplementedError()
+        self.inputs = inputs
+        self.outputs = outputs

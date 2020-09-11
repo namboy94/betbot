@@ -22,8 +22,22 @@ from betbot.neural.functions.Function import Function
 
 
 class Sigmoid(Function):
-    def activation(self, x: float) -> float:
+    """
+    Class that implements the sigmoid function
+    """
+
+    def function(self, x: float) -> float:
+        """
+        Executes the function
+        :param x: The input
+        :return: The output
+        """
         return 1 / (1 + exp(-x))
 
     def derivative(self, x: float) -> float:
-        return self.activation(x) * (1 - self.activation(x))
+        """
+        Executes the derivative of the function
+        :param x: The input
+        :return: The output
+        """
+        return self.function(x) * (1 - self.function(x))

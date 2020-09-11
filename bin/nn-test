@@ -1,7 +1,7 @@
-from math import exp
 from betbot.neural.MLP import MLP
 from betbot.neural.functions.Sigmoid import Sigmoid
 from betbot.neural.layer.FullyConnectedLayer import FullyConnectedLayer
+from betbot.neural.data.LabelledData import LabelledData
 
 
 layers = [
@@ -9,22 +9,15 @@ layers = [
     FullyConnectedLayer(4, 2, Sigmoid(), True),
     FullyConnectedLayer(2, 1, Sigmoid(), False),
 ]
-
 mlp = MLP(layers, None)
 
-print(mlp.classify([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]))
-
-training_item = (
-    [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0],
-    [0.15]
-)
-data = []
-for i in range(0, 1000):
-    data.append(training_item)
-
+data = [
+    LabelledData([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0], [0.15])
+    for x in range(10000)
+]
 mlp.train(
     data,
-    0.01,
+    0.0001,
     50
 )
-mlp.save_weights("/home/hermann/git/betbot/test.json")
+mlp.save_model("/home/hermann/git/betbot/test.json")

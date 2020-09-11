@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List
+from typing import List, TYPE_CHECKING
 from betbot.neural.components.Neuron import Neuron
 from betbot.neural.functions.Function import Function
+if TYPE_CHECKING:
+    from betbot.neural.components.Weights import Weights
 
 
 class Layer:
@@ -34,6 +36,14 @@ class Layer:
             activation_function: Function,
             has_bias: bool
     ):
+        """
+        Initializes the layer
+        :param inputs: The amount of inputs
+        :param outputs: The amount of outputs/neurons
+        :param activation_function: The activation function to use
+        :param has_bias: Whether or not the layer has a bias
+        """
+        self._index = 0
         self.inputs = inputs
         self.outputs = outputs
         self.activation_function = activation_function
@@ -41,13 +51,37 @@ class Layer:
         if self.has_bias:
             self.inputs += 1
         self.neurons = [
-            Neuron(activation_function)
-            for _ in range(0, self.outputs)
+            Neuron(i, self.index, activation_function, self.inputs)
+            for i in range(0, self.outputs)
         ]
 
-    def execute(
+    @property
+    def index(self) -> int:
+        """
+        :return: The index of the layer
+        """
+        return self._index
+
+    @index.setter
+    def index(self, new: int):
+        """
+        Setter method for the layer index
+        :param new: The new layer index
+        :return: None
+        """
+        self._index = new
+        for neuron in self.neurons:
+            neuron.layer_index = new
+
+    def feed_forward(
             self,
             input_data: List[float],
-            weights: List[List[float]]
+            weights: "Weights"
     ) -> List[float]:
+        """
+        Performs a feed-forward iteration on input data
+        :param input_data: The input data
+        :param weights: The weights of the neural network
+        :return: The resulting output from the neurons
+        """
         raise NotImplementedError()

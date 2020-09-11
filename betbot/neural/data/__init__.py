@@ -16,25 +16,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
-
-
-class Function:
-    """
-    Class that models a function of the form R -> R (float -> float)
-    """
-
-    def function(self, x: float) -> float:
-        """
-        Executes the function
-        :param x: The input
-        :return: The output
-        """
-        raise NotImplementedError()
-
-    def derivative(self, x: float) -> float:
-        """
-        Executes the derivative of the function
-        :param x: The input
-        :return: The output
-        """
-        raise NotImplementedError()

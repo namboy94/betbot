@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List, Tuple
+from typing import List
+from betbot.neural.data.LabelledData import LabelledData
 from betbot.neural.NeuralNetworkFramework import NeuralNetworkFramework
 
 
@@ -28,31 +29,41 @@ class MLP(NeuralNetworkFramework):
 
     def train(
             self,
-            labelled_data: List[Tuple[List[float], List[float]]],
+            labelled_data: List[LabelledData],
             learning_rate: float,
             epochs: int
     ):
+        """
+        Trains the neural network using backpropagation
+        :param labelled_data: The labelled data used to learn
+        :param learning_rate: The learning rate
+        :param epochs: The amount of iterations to learn
+        :return: None
+        """
         training_data, validation_data, test_data = \
             self.split_labelled_data(labelled_data)
 
         for epoch in range(0, epochs):
-            for inputs, expected_outputs in training_data:
-                errors = self.back_propagate(inputs, expected_outputs)
-                self.adjust_weights(errors, inputs, learning_rate)
-                calculated = self.classify(inputs)
-                total_error = 0
-                for i, expected in enumerate(expected_outputs):
-                    print(expected_outputs)
-                    print(calculated)
-                    total_error += (expected - calculated[i]) ** 2
+            for training in training_data:
+                errors = self.back_propagate(training.inputs, training.outputs)
+                self.adjust_weights(errors, training.inputs, learning_rate)
 
-                print(f"Epoch {epoch}: Error: {total_error:.3f}")
+            self.display_training_iteration(
+                epoch, learning_rate, validation_data
+            )
 
-            self.display_accuracy(test_data)
-
-    def back_propagate(self, inputs: List[float], expected_outputs: List[float]) -> List[List[float]]:
-
-        deltas = []
+    def back_propagate(
+            self,
+            inputs: List[float],
+            expected_outputs: List[float]
+    ) -> List[List[float]]:
+        """
+        Back-propagates the error through the network
+        :param inputs: The inputs to pass through the network
+        :param expected_outputs: The expected outputs of the output layer
+        :return: A 2-dimensional matrix containing the errors for each neuron
+        """
+        deltas: List[List[float]] = []
 
         for layer_number, layer in enumerate(reversed(self.layers)):
             layer_index = len(self.layers) - layer_number - 1
@@ -73,19 +84,38 @@ class MLP(NeuralNetworkFramework):
                 for i in range(0, layer.outputs):
                     error = 0.0
                     for j in range(0, previous_layer.outputs):
-                        weight = self.weights[previous_layer_index][j][i]
+                        weight = self.weights.get_weight(
+                            layer=previous_layer_index,
+                            neuron=j,
+                            input_=i
+                        )
                         delta = deltas[previous_layer_number][j]
                         error += weight * delta
                     errors.append(error)
 
             for weight_index, neuron in enumerate(layer.neurons):
                 neuron_error = errors[weight_index]
-                delta = neuron_error * layer.activation_function.derivative(neuron.last_output)
+                delta = neuron_error * layer.activation_function.derivative(
+                    neuron.last_output
+                )
                 deltas[layer_number].append(delta)
 
         return list(reversed(deltas))
 
-    def adjust_weights(self, errors: List[List[float]], inputs: List[float], learning_rate: float):
+    def adjust_weights(
+            self,
+            errors: List[List[float]],
+            inputs: List[float],
+            learning_rate: float
+    ):
+        """
+        Adjusts the network's weights based on the errors in the
+        backpropagation.
+        :param errors: The errors of the backpropagation
+        :param inputs: The inputs that led to these errors
+        :param learning_rate: The learning rate
+        :return: None
+        """
         for layer_index, layer in enumerate(self.layers):
 
             if layer_index == 0:
@@ -95,16 +125,15 @@ class MLP(NeuralNetworkFramework):
                 layer_inputs = [x.last_output for x in previous_layer.neurons]
 
             for neuron_index, neuron in enumerate(layer.neurons):
-                neuron_weights = self.weights[layer_index][neuron_index]
+                neuron_weights = self.weights.get_neuron_weights(neuron)
                 for i, input_data in enumerate(layer_inputs):
                     current_weight = neuron_weights[i]
                     error = errors[layer_index][neuron_index]
-                    new_weight = current_weight + learning_rate * error * input_data
-                    self.weights[layer_index][neuron_index][i] = new_weight
-
-    def display_accuracy(self, test_data: List[Tuple[List[float], List[float]]]):
-        correct = 0
-        for inputs, expected_outputs in test_data:
-            calculated = self.classify(inputs)
-            if calculated == expected_outputs:
-                correct += 1
+                    new_weight = \
+                        current_weight + learning_rate * error * input_data
+                    self.weights.set_weight(
+                        layer=layer_index,
+                        neuron=neuron_index,
+                        input_=i,
+                        weight=new_weight
+                    )

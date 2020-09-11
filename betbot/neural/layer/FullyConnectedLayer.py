@@ -19,6 +19,7 @@ LICENSE"""
 
 from typing import List
 from betbot.neural.layer.Layer import Layer
+from betbot.neural.components.Weights import Weights
 
 
 class FullyConnectedLayer(Layer):
@@ -26,15 +27,21 @@ class FullyConnectedLayer(Layer):
     Class that models a fully connected layer in a neural network
     """
 
-    def execute(
+    def feed_forward(
             self,
             input_data: List[float],
-            weights: List[List[float]]
+            weights: Weights
     ) -> List[float]:
+        """
+        Performs a feed-forward iteration on input data
+        :param input_data: The input data
+        :param weights: The weights of the neural network
+        :return: The resulting output from the neurons
+        """
         outputs = []
-        for i in range(0, self.outputs):
-            neuron = self.neurons[i]
-            neuron_weights = weights[i]
-            outputs.append(neuron.execute(input_data, neuron_weights))
-
+        input_ = input_data
+        if self.has_bias:
+            input_ = [1.0] + input_
+        for neuron in self.neurons:
+            outputs.append(neuron.execute(input_, weights))
         return outputs

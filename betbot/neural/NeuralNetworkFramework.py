@@ -17,10 +17,14 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import os
 import json
 import random
+import logging
 from typing import List, Optional, Tuple
 from betbot.neural.layer.Layer import Layer
+from betbot.neural.components.Weights import Weights
+from betbot.neural.data.LabelledData import LabelledData
 
 
 class NeuralNetworkFramework:
@@ -31,36 +35,83 @@ class NeuralNetworkFramework:
     def __init__(
             self,
             layers: List[Layer],
-            initial_weights: Optional[List[List[List[float]]]]
+            model_file: Optional[str] = None
     ):
+        """
+        Initializes the neural network
+        :param layers: The layers of the network
+        :param model_file: Optional model file which contains previously
+                           trained weights
+        """
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.layers = layers
-        if initial_weights is None:
-            self.weights = []
-            for layer in layers:
-                self.weights.append([])
-                for i in range(0, layer.outputs):
-                    self.weights[-1].append([])
-                    for j in range(0, layer.inputs):
-                        self.weights[-1][-1].append(random.random())
+        for i, layer in enumerate(self.layers):
+            layer.index = i
+        self.weights = self.load_weights(model_file)
+
+    def load_weights(self, model_file: Optional[str]) -> Weights:
+        """
+        Loads weights from an existing model file
+        If the model file is None or does not exist, random initial weights
+        will be generated
+        :param model_file: The model file to use
+        :return: The loaded/generated weights
+        """
+        if model_file is None or not os.path.isfile(model_file):
+            weights = Weights(self.layers)
         else:
-            self.weights = initial_weights
+            with open(model_file, "r") as f:
+                existing_weights = json.load(f)["weights"]
+                weights = Weights(self.layers, existing_weights)
+        return weights
 
     def train(
             self,
-            labelled_data: List[Tuple[List[float], float]],
+            labelled_data: List[LabelledData],
             learning_rate: float,
             epochs: int
     ):
+        """
+        Trains the neural network
+        :param labelled_data: The labelled data used to learn
+        :param learning_rate: The learning rate
+        :param epochs: The amount of iterations to learn
+        :return: None
+        """
         raise NotImplementedError()
+
+    def classify(self, inputs: List[float]) -> List[float]:
+        """
+        Performs a forward pass through the network to classify an input
+        :param inputs: The inputs to pass through the network
+        :return: The outputs from the output layer
+        """
+        current_inputs = inputs
+        for i, layer in enumerate(self.layers):
+            current_inputs = layer.feed_forward(current_inputs, self.weights)
+        return current_inputs
+
+    def save_model(self, model_file: str):
+        """
+        Saves the current weights in a model file
+        :param model_file: The path to the file to create
+        :return: None
+        """
+        with open(model_file, "w") as f:
+            json.dump({
+                "weights": self.weights.to_matrix()
+            }, f, indent=4)
 
     @staticmethod
     def split_labelled_data(
-            labelled_data: List[Tuple[List[float], List[float]]]
-    ) -> Tuple[
-        List[Tuple[List[float], List[float]]],
-        List[Tuple[List[float], List[float]]],
-        List[Tuple[List[float], List[float]]]
-    ]:
+            labelled_data: List[LabelledData]
+    ) -> Tuple[List[LabelledData], List[LabelledData], List[LabelledData]]:
+        """
+        Creates a training, validation and test set from labelled data
+        in a 2:1:1 ratio
+        :param labelled_data: The labelled data
+        :return: The training, validation and test sets
+        """
         random.shuffle(labelled_data)
 
         border_0 = 0
@@ -74,16 +125,33 @@ class NeuralNetworkFramework:
 
         return training_data, validation_data, test_data
 
-    def classify(self, inputs: List[float]) -> List[float]:
-        for i, layer in enumerate(self.layers):
-            if layer.has_bias:
-                inputs = [1.0] + inputs
-            inputs = layer.execute(inputs, self.weights[i])
-        return inputs
+    def display_training_iteration(
+            self,
+            epoch: int,
+            learning_rate: float,
+            validation_data: List[LabelledData]
+    ) -> float:
+        """
+        Displays the current state of the classifier after a training iteration
+        :param epoch: The epoch of the iteration
+        :param learning_rate: The learning rate
+        :param validation_data: The validation data
+        :return: The average error
+        """
+        errors: List[float] = []
+        for validation in validation_data:
+            calculated = self.classify(validation.inputs)
+            error = 0.0
+            for i, expected in enumerate(validation.outputs):
+                error += (expected - calculated[i]) ** 2
+            errors.append(error)
+        average_error = sum(errors) / len(errors)
+        print(f"Epoch: {epoch}; "
+              f"Learning Rate: {learning_rate}; "
+              f"Error: {average_error:.2f}"
+              )
+        return average_error
 
-    def save_weights(self, file_path: str):
-        with open(file_path, "w") as f:
-            json.dump({"weights": self.weights}, f, indent=4)
 
 """
 Inputs:
@@ -97,8 +165,4 @@ Home Team + Away Team:
     goals per game last 5 matches
     goals conceded per last 5 matches
 
-
-
 """
-
-
