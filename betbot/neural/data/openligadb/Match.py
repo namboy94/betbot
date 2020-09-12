@@ -28,11 +28,15 @@ class Match:
 
     def __init__(
             self,
+            league: str,
+            season: int,
             match_json: Dict[str, Any],
             teams: Dict[int, Team]
     ):
         """
         Initializes the match object
+        :param league: The league of the match
+        :param season: The season of the match
         :param match_json: The OpenligaDB JSON data for the match
         :param teams: The teams mapped to their IDs
         """
@@ -44,6 +48,8 @@ class Match:
         else:
             home_score, away_score = None, None
 
+        self.league = league
+        self.season = season
         self.matchday = match_json["Group"]["GroupOrderID"]
         self.home_team = teams[match_json["Team1"]["TeamId"]]
         self.away_team = teams[match_json["Team2"]["TeamId"]]

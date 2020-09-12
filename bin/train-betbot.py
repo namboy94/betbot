@@ -18,38 +18,31 @@ You should have received a copy of the GNU General Public License
 along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import os
 import argparse
 from betbot import sentry_dsn
-from betbot.neural.data.openligadb.processing import generate_training_csv, \
-    load_csv
-from betbot.neural.keras_models import table_history_model
 from puffotter.init import cli_start, argparse_add_verbosity
-from matplotlib import pyplot
+from betbot.neural.keras.TableHistoryTrainer import TableHistoryTrainer
 
 
 def main(args: argparse.Namespace):
     """
-    The main function of the betbot
+    Trains the betbot neural networks and evaluates them
     :param args: The command line arguments
     :return: None
     """
-    csv_file = args.output + ".csv"
-    if not os.path.isfile(csv_file):
-        generate_training_csv(csv_file)
-    inputs, outputs = load_csv(csv_file)
-    model = table_history_model()
-    history = model.fit(inputs, outputs, epochs=50, batch_size=10)
-    if args.show_plot:
-        pyplot.plot(history.history["mae"])
-        pyplot.show()
-    model.save(args.output)
+    trainer = TableHistoryTrainer(args.output_dir)
+    trainer.name = args.name
+    model, score = trainer.train(args.iterations, args.epochs, args.batch_size)
+    print(f"Score: {score}")
+    #model.save(trainer.model_path)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("output", help="The output path for the trained model")
-    parser.add_argument("--show-plot", action="store_true",
-                        help="Shows a plot of the error during training")
+    parser.add_argument("output_dir")
+    parser.add_argument("name")
+    parser.add_argument("--iterations", type=int, default=3)
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--batch-size", type=int, default=25)
     argparse_add_verbosity(parser)
     cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

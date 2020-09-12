@@ -17,8 +17,8 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List, Optional
-from betbot.neural.data.openligadb.TableEntry import TableEntry
+from typing import List
+from betbot.neural.data.openligadb.HistoryRecord import HistoryRecord
 
 
 class InputVector:
@@ -29,79 +29,37 @@ class InputVector:
 
     def __init__(
             self,
-            home_table_entry: TableEntry,
-            away_table_entry: TableEntry,
-            home_table_entry_5_matchdays_ago: TableEntry,
-            away_table_entry_5_matchdays_ago: TableEntry,
-            home_last_season_entry: Optional[TableEntry],
-            away_last_season_entry: Optional[TableEntry]
+            season: int,
+            matchday: int,
+            finished: bool,
+            home_team_history: HistoryRecord,
+            away_team_history: HistoryRecord
     ):
         """
         Initializes the InputVector
-        :param home_table_entry: The current table entry of the home team
-        :param away_table_entry: The current table entry of the away team
-        :param home_table_entry_5_matchdays_ago: The table entry of the home
-                                                 team 5 matchdays ago
-        :param away_table_entry_5_matchdays_ago: The table entry of the away
-                                                 team 5 matchdays ago
-        :param home_last_season_entry: The table entry on the last matchday
-                                       of last season for the home team
-        :param away_last_season_entry: The table entry on the last matchday
-                                       of last season for the away team
+        :param season: The season of the input
+        :param matchday: The match day
+        :param finished: Whether or not the match has finished
+        :param home_team_history: The table history of the home team
+        :param away_team_history: The table history of the away team
         """
-        self.home_total_points = home_table_entry.points
-        self.home_total_goals_for = home_table_entry.goals_for
-        self.home_total_goals_against = home_table_entry.goals_against
-        self.away_total_points = away_table_entry.points
-        self.away_total_goals_for = away_table_entry.goals_for
-        self.away_total_goals_against = away_table_entry.goals_against
+        self.home_total_points, self.home_total_goals_for, \
+            self.home_total_goals_against = \
+            home_team_history.get_stats(season, matchday, finished)
+        self.away_total_points, self.away_total_goals_for, \
+            self.away_total_goals_against = \
+            away_team_history.get_stats(season, matchday, finished)
 
-        if home_table_entry.matchday < 6 and \
-                home_last_season_entry is not None and \
-                away_last_season_entry is not None:
-            self.home_points_last_5_matches = \
-                home_table_entry.points + \
-                home_last_season_entry.points - \
-                home_table_entry_5_matchdays_ago.points
-            self.home_goals_for_last_5_matches = \
-                home_table_entry.goals_for + \
-                home_last_season_entry.goals_for - \
-                home_table_entry_5_matchdays_ago.goals_for
+        self.home_points_last_5_matches, self.home_goals_for_last_5_matches, \
             self.home_goals_against_last_5_matches = \
-                home_table_entry.goals_against + \
-                home_last_season_entry.goals_against - \
-                home_table_entry_5_matchdays_ago.goals_against
-            self.away_points_last_5_matches = \
-                away_table_entry.points + \
-                away_last_season_entry.points - \
-                away_table_entry_5_matchdays_ago.points
-            self.away_goals_for_last_5_matches = \
-                away_table_entry.goals_for + \
-                away_last_season_entry.goals_for - \
-                away_table_entry_5_matchdays_ago.goals_for
+            home_team_history.get_stats_interval(
+                season, matchday, 5, finished
+            )
+        self.away_points_last_5_matches, self.away_goals_for_last_5_matches,\
             self.away_goals_against_last_5_matches = \
-                away_table_entry.goals_against + \
-                away_last_season_entry.goals_against - \
-                away_table_entry_5_matchdays_ago.goals_against
-        else:
-            self.home_points_last_5_matches = \
-                home_table_entry.points - \
-                home_table_entry_5_matchdays_ago.points
-            self.home_goals_for_last_5_matches = \
-                home_table_entry.goals_for - \
-                home_table_entry_5_matchdays_ago.goals_for
-            self.home_goals_against_last_5_matches = \
-                home_table_entry.goals_against - \
-                home_table_entry_5_matchdays_ago.goals_against
-            self.away_points_last_5_matches = \
-                away_table_entry.points - \
-                away_table_entry_5_matchdays_ago.points
-            self.away_goals_for_last_5_matches = \
-                away_table_entry.goals_for - \
-                away_table_entry_5_matchdays_ago.goals_for
-            self.away_goals_against_last_5_matches = \
-                away_table_entry.goals_against - \
-                away_table_entry_5_matchdays_ago.goals_against
+            away_team_history.get_stats_interval(
+                season, matchday, 5, finished
+            )
 
     @property
     def vector(self) -> List[int]:

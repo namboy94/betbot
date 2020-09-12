@@ -26,6 +26,7 @@ from betbot.neural.data.openligadb.Match import Match
 from betbot.neural.data.openligadb.TableEntry import TableEntry
 from betbot.neural.data.openligadb.InputVector import InputVector
 from betbot.neural.data.openligadb.OutputVector import OutputVector
+from betbot.neural.data.openligadb.HistoryRecord import HistoryRecord
 
 
 def load_data(league: str, season: int) \
@@ -47,7 +48,10 @@ def load_data(league: str, season: int) \
     _teams = [Team(team_json) for team_json in team_data]
     teams = {team.id: team for team in _teams}
 
-    _matches = [Match(match_json, teams) for match_json in match_data]
+    _matches = [
+        Match(league, season, match_json, teams)
+        for match_json in match_data
+    ]
     matches = {}
     for match in _matches:
         if match.matchday not in matches:
@@ -70,52 +74,52 @@ def calculate_tables(matches: Dict[int, List[Match]]) \
         previous_table = tables.get(matchday - 1)
 
         for match in matchday_matches:
-
-            if match.home_score > match.away_score:
-                home_points, away_points = 3, 0
-            elif match.home_score < match.away_score:
-                home_points, away_points = 0, 3
-            else:
-                home_points, away_points = 1, 1
-
-            home_entry = TableEntry(
-                matchday,
-                match.home_team,
-                home_points,
-                match.home_score,
-                match.away_score
-            )
-            away_entry = TableEntry(
-                matchday,
-                match.away_team,
-                away_points,
-                match.away_score,
-                match.home_score
-            )
-
+            home_entry = TableEntry.from_match(match, match.home_team)
+            away_entry = TableEntry.from_match(match, match.away_team)
             if previous_table is not None:
                 home_entry.merge(previous_table[match.home_team.id])
                 away_entry.merge(previous_table[match.away_team.id])
-
             tables[matchday][match.home_team.id] = home_entry
             tables[matchday][match.away_team.id] = away_entry
 
     return tables
 
 
-def generate_training_data() -> List[Tuple[InputVector, OutputVector]]:
+def calculate_history(match_data: Dict[int, Dict[int, List[Match]]]) \
+        -> Dict[int, HistoryRecord]:
+    """
+    Calculates historical table data
+    :param match_data: The match data for all seasons to include
+    :return: The history for each team
+    """
+    all_tables = {}
+    for season, matches in match_data.items():
+        all_tables[season] = calculate_tables(matches)
+
+    history = {}
+    for tables in all_tables.values():
+        for matchday_tables in tables.values():
+            for team_id, entry in matchday_tables.items():
+                if team_id not in history:
+                    history[team_id] = HistoryRecord(entry.team)
+                history[team_id].add_table_entry(entry)
+    return history
+
+
+def generate_training_data(leagues: List[str], seasons: List[int]) \
+        -> List[Tuple[InputVector, OutputVector]]:
     """
     Creates training data for multiple seasons and leagues
+    :param leagues: The leagues for which to generate training data
+    :param seasons: The seasons for which to generate training data
     :return: The training data as a list of input/output vector tuples
     """
     vectors = []
 
-    leagues = ["bl1", "bl2", "bl3"]
-    seasons = list(range(2010, 2020))
-
     all_teams = {}
     all_matches = {}
     all_tables = {}
+    histories = {}
 
     print("Loading data...")
     for league in leagues:
@@ -129,56 +133,27 @@ def generate_training_data() -> List[Tuple[InputVector, OutputVector]]:
             all_teams[league][season] = team_data
             all_matches[league][season] = match_data
             all_tables[league][season] = table_data
+        histories[league] = calculate_history(all_matches[league])
     print("Done!")
 
     for league in leagues:
         for season in seasons:
             match_data = all_matches[league][season]
-            table_data = all_tables[league][season]
-            previous_season_tables = all_tables[league].get(season - 1)
-            last_matchday = max(table_data.keys())
-
             for matchday, matches in match_data.items():
-
-                previous_table = table_data.get(matchday - 1)
-                previous_table5 = table_data.get(max(1, matchday - 6))
-
-                if matchday < 6 and previous_season_tables is None:
-                    continue
-                elif matchday < 6:
-                    if matchday == 1:
-                        previous_table = previous_season_tables[last_matchday]
-                    target_5 = last_matchday - (6 - matchday)
-                    previous_table5 = previous_season_tables[target_5]
-
                 for match in matches:
-                    try:
-                        home_team_entry = previous_table[match.home_team.id]
-                        away_team_entry = previous_table[match.away_team.id]
-                        home_team_entry5 = previous_table5[match.home_team.id]
-                        away_team_entry5 = previous_table5[match.away_team.id]
-                    except KeyError:
+
+                    if not match.finished:  # Exclude unfinished matches
                         continue
 
-                    if matchday < 6:
-                        home_previous_season_final = previous_season_tables[
-                            last_matchday].get(match.home_team.id)
-                        away_previous_season_final = previous_season_tables[
-                            last_matchday].get(match.away_team.id)
-                        if home_previous_season_final is None \
-                                or away_previous_season_final is None:
-                            continue
-                    else:
-                        home_previous_season_final = None
-                        away_previous_season_final = None
+                    home_team_history = histories[league][match.home_team.id]
+                    away_team_history = histories[league][match.away_team.id]
 
                     input_vector = InputVector(
-                        home_team_entry,
-                        away_team_entry,
-                        home_team_entry5,
-                        away_team_entry5,
-                        home_previous_season_final,
-                        away_previous_season_final
+                        season,
+                        matchday,
+                        match.finished,
+                        home_team_history,
+                        away_team_history
                     )
                     output_vector = OutputVector(
                         match.home_score,
@@ -195,7 +170,9 @@ def generate_training_csv(csv_path: str):
     :param csv_path: The path to the CSV file
     :return: None
     """
-    vectors = generate_training_data()
+    leagues = ["bl1", "bl2", "bl3"]
+    seasons = list(range(2010, 2020))
+    vectors = generate_training_data(leagues, seasons)
     training_data = []
 
     for input_vector, output_vector in vectors:
@@ -206,17 +183,21 @@ def generate_training_csv(csv_path: str):
         writer.writerows(training_data)
 
 
-def load_csv(csv_file: str) -> Tuple[List[List[float]], List[List[float]]]:
+def load_csv(csv_file: str) -> List[Tuple[List[float], List[float]]]:
     """
     Loads training data from a CSV file
     :param csv_file: The CSV file
     :return: The Input vectors and expected Output Vectors
     """
-    inputs = []
-    outputs = []
+    data = []
     with open(csv_file, "r", newline="") as f:
         for line in csv.reader(f):
-            inputs.append([float(x) for x in line[0:-2]])
-            outputs.append([float(x) for x in line[-2:]])
+            data.append(line)
 
-    return inputs, outputs
+    vectors = []
+    for data_point in data:
+        input_vector = [float(x) for x in data_point[0:-2]]
+        output_vector = [float(x) for x in data_point[-2:]]
+        vectors.append((input_vector, output_vector))
+
+    return vectors

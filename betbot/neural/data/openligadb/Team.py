@@ -32,3 +32,27 @@ class Team:
         """
         self.id = team_json["TeamId"]
         self.team_name = team_json["TeamName"]
+        self.abbreviation = {
+            "1. FC Nürnberg": "FCN",
+            "1. FSV Mainz 05": "M05",
+            "Bayer Leverkusen": "B04",
+            "Borussia Dortmund": "BVB",
+            "Borussia Mönchengladbach": "BMG",
+            "Eintracht Frankfurt": "SGE",
+            "FC Augsburg": "FCA",
+            "FC Bayern": "FCB",
+            "FC Schalke 04": "S04",
+            "Fortuna Düsseldorf": "F95",
+            "Hannover 96": "H96",
+            "Hertha BSC": "BSC",
+            "RB Leipzig": "RBL",
+            "SC Freiburg": "SCF",
+            "TSG 1899 Hoffenheim": "TSG",
+            "VfB Stuttgart": "VFB",
+            "VfL Wolfsburg": "VFL",
+            "Werder Bremen": "SVW",
+            "1. FC Union Berlin": "SCU",
+            "SC Paderborn 07": "PAD",
+            "1. FC Köln": "FCK",
+            "Arminia Bielefeld": "BIE"
+        }.get(self.team_name, "N/A")

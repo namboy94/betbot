@@ -31,5 +31,5 @@ def table_history_model() -> Sequential:
     model.add(Flatten(input_shape=(12,)))
     model.add(Dense(25, activation='relu'))
     model.add(Dense(2, activation='relu'))
-    model.compile(loss='mse', optimizer='adam', metrics=['mae'])
+    model.compile(loss='mae', optimizer='adadelta', metrics=['mae', 'mse'])
     return model
