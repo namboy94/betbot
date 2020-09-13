@@ -52,7 +52,7 @@ class InputVector:
             list(away_team_history.get_stats(season, matchday, finished))
         self.history_stats = {}
 
-        for interval in [8]:
+        for interval in [7]:
             self.history_stats[interval] = \
                 list(home_team_history.get_stats_interval(
                     season, matchday, interval, finished
@@ -66,7 +66,7 @@ class InputVector:
         """
         :return: The input vector as a list of integers
         """
-        vector = [self.matchday] + self.current_stats
+        vector = self.current_stats
         for key in sorted(self.history_stats.keys()):
             vector += self.history_stats[key]
         return vector
@@ -78,13 +78,11 @@ class InputVector:
         :return: The normalized vector
         """
         vector = list(vector)  # copy
-        vector[0] = \
-            vector[0] / self.home_team_history.get_max_matchday(self.season)
-        for overall_index in range(1, 7):
+        for overall_index in range(0, 6):
             vector[overall_index] = \
                 min(1.0, vector[overall_index] / (self.matchday * 3))
 
-        for history_index in range(7, len(vector)):
+        for history_index in range(6, len(vector)):
             vector[history_index] = \
                 min(1.0, vector[history_index] / (5 * 3))
         return vector

@@ -52,7 +52,7 @@ class TableHistoryTrainer(BetPredictorTrainer):
         :return: The model
         """
         model = Sequential()
-        model.add(Flatten(input_shape=(13,)))
+        model.add(Flatten(input_shape=(12,)))
         model.add(Dense(20, activation="sigmoid"))
         model.add(Dense(2, activation="relu"))
         return model

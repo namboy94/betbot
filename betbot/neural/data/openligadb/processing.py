@@ -183,9 +183,6 @@ def generate_training_csv(csv_path: str):
     :return: None
     """
     league_seasons = []
-    # for intl in ["PD", "SA", "PL"]:
-    #     for season in range(2010, 2016):
-    #         league_seasons.append((intl, season))
     for bl in ["bl1", "bl2", "bl3"]:
         for season in range(2010, 2020):
             league_seasons.append((bl, season))

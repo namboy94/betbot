@@ -19,6 +19,7 @@ LICENSE"""
 
 import os
 from typing import List
+from datetime import datetime
 from betbot.api.Bet import Bet
 from betbot.api.Match import Match
 from betbot.prediction.Predictor import Predictor
@@ -41,7 +42,7 @@ class TableHistoryNNPredictor(Predictor):
         super().__init__()
         self.model_data_path = os.path.join(self.model_dir, self.name())
         trainer = TableHistoryTrainer(self.model_data_path)
-        self.model = trainer.load_trained_model(iterations=15)
+        self.model = trainer.load_trained_model(iterations=8)
 
     @classmethod
     def name(cls) -> str:
@@ -75,7 +76,12 @@ class TableHistoryNNPredictor(Predictor):
         :return: The input vectors
         """
         league = "bl1"
-        season = 2019
+
+        now = datetime.utcnow()
+        if now.month < 8:
+            season = now.year - 1
+        else:
+            season = now.year
 
         current_teams, current_matches = load_data(league, season)
         previous_teams, previous_matches = load_data(league, season - 1)
@@ -94,7 +100,7 @@ class TableHistoryNNPredictor(Predictor):
             vector = InputVector(
                 season,
                 match.matchday,
-                match.finished,
+                False,
                 home_history,
                 away_history
             )
