@@ -19,7 +19,6 @@ along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import argparse
 from betbot import sentry_dsn
 from keras.models import Sequential
