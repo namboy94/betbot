@@ -18,8 +18,12 @@ You should have received a copy of the GNU General Public License
 along with bundesliga-tippspiel.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import argparse
 from betbot import sentry_dsn
+from keras.models import Sequential
+from keras.layers import Dense, Flatten
 from puffotter.init import cli_start, argparse_add_verbosity
 from betbot.neural.keras.TableHistoryTrainer import TableHistoryTrainer
 
@@ -32,17 +36,59 @@ def main(args: argparse.Namespace):
     """
     trainer = TableHistoryTrainer(args.output_dir)
     trainer.name = args.name
-    model, score = trainer.train(args.iterations, args.epochs, args.batch_size)
-    print(f"Score: {score}")
-    #model.save(trainer.model_path)
+
+    if args.refresh_training_data:
+        trainer.load_training_data(True)
+
+    def gen_model(h, o):
+        return Sequential([
+            Flatten(input_shape=(12,)),
+            Dense(20, activation=h),
+            Dense(2, activation=o)
+        ])
+
+    custom_models = [
+        (lambda: gen_model("sigmoid", "relu"), "sigmoid-relu"),
+        (lambda: gen_model("sigmoid", "relu"), "sigmoid-linear"),
+        (lambda: gen_model("sigmoid", "exponential"), "sigmoid-exponential"),
+        (lambda: gen_model("linear", "linear"), "linear-linear")
+    ]
+    custom_compilations = [
+        (lambda m: m.compile(loss="mae", optimizer="sgd"), "mae-sgd"),
+        (lambda m: m.compile(loss="mae", optimizer="adamax"), "mae-adamax"),
+        (lambda m: m.compile(loss="mae", optimizer="nadam"), "mae-nadam")
+    ]
+    if not args.try_parameters:
+        custom_models = [(None, "default")]
+        custom_compilations = custom_models
+
+    for custom_model in custom_models:
+        for custom_compilation in custom_compilations:
+            name = f"{args.name}-{custom_model[1]}-{custom_compilation[1]}"
+            trainer.name = name
+            model, score, accuracy, avg_score, avg_accuracy = trainer.train(
+                args.iterations,
+                args.epochs,
+                args.batch_size,
+                custom_model_fn=custom_model[0],
+                custom_compile_fn=custom_compilation[0]
+            )
+            print(f"Best Score: {score}, "
+                  f"Best Accuracy: {accuracy:.2f}%")
+            print(f"Average Score: {avg_score}, "
+                  f"Average Accuracy: {avg_accuracy:.2f}%")
+            name = f"[{avg_score:.2f}][{score:.2f}] {name}"
+            model.save(os.path.join(args.output_dir, name))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dir")
     parser.add_argument("name")
-    parser.add_argument("--iterations", type=int, default=3)
-    parser.add_argument("--epochs", type=int, default=100)
-    parser.add_argument("--batch-size", type=int, default=25)
+    parser.add_argument("--iterations", type=int, default=4)
+    parser.add_argument("--epochs", type=int, default=64)
+    parser.add_argument("--batch-size", type=int, default=32)
+    parser.add_argument("--refresh-training-data", action="store_true")
+    parser.add_argument("--try-parameters", action="store_true")
     argparse_add_verbosity(parser)
     cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

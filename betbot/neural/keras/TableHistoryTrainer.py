@@ -46,14 +46,21 @@ class TableHistoryTrainer(BetPredictorTrainer):
         vectors = load_csv(csv_file)
         return vectors
 
-    def define_model(self) -> Model:
+    def _define_model(self) -> Model:
         """
         Specifies the model of the neural network
         :return: The model
         """
         model = Sequential()
-        model.add(Flatten(input_shape=(12,)))
-        model.add(Dense(25, activation="sigmoid"))
+        model.add(Flatten(input_shape=(13,)))
+        model.add(Dense(20, activation="sigmoid"))
         model.add(Dense(2, activation="relu"))
-        model.compile(loss="mae", optimizer='nadam', metrics=["mae"])
         return model
+
+    def _compile_model(self, model: Model):
+        """
+        Compiles the keras model
+        :param model: The model to compile
+        :return: None
+        """
+        model.compile(loss="mae", optimizer="nadam")

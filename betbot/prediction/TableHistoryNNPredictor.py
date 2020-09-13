@@ -19,14 +19,13 @@ LICENSE"""
 
 import os
 from typing import List
-from keras.models import load_model
 from betbot.api.Bet import Bet
 from betbot.api.Match import Match
 from betbot.prediction.Predictor import Predictor
-from betbot.neural.keras_models import table_history_model
+from betbot.neural.keras.TableHistoryTrainer import TableHistoryTrainer
 from betbot.neural.data.openligadb.InputVector import InputVector
 from betbot.neural.data.openligadb.processing import calculate_history, \
-    load_data, generate_training_csv, load_csv
+    load_data
 
 
 class TableHistoryNNPredictor(Predictor):
@@ -41,17 +40,8 @@ class TableHistoryNNPredictor(Predictor):
         """
         super().__init__()
         self.model_data_path = os.path.join(self.model_dir, self.name())
-        if os.path.exists(self.model_data_path):
-            self.model = load_model(self.model_data_path)
-        else:
-            self.model = table_history_model()
-            csv_file = self.model_data_path + ".csv"
-            if not os.path.isfile(csv_file):
-                generate_training_csv(csv_file)
-            inputs, outputs = load_csv(csv_file)
-            model = table_history_model()
-            model.fit(inputs, outputs, epochs=200, batch_size=10)
-            model.save(self.model_data_path)
+        trainer = TableHistoryTrainer(self.model_data_path)
+        self.model = trainer.load_trained_model(iterations=15)
 
     @classmethod
     def name(cls) -> str:
@@ -71,6 +61,7 @@ class TableHistoryNNPredictor(Predictor):
         predictions = self.model.predict(vectors).tolist()
 
         for i, match in enumerate(matches):
+            print(predictions[i])
             result = [int(round(x)) for x in predictions[i]]
             bets.append(Bet(match.id, result[0], result[1]))
 
@@ -84,7 +75,7 @@ class TableHistoryNNPredictor(Predictor):
         :return: The input vectors
         """
         league = "bl1"
-        season = 2020
+        season = 2019
 
         current_teams, current_matches = load_data(league, season)
         previous_teams, previous_matches = load_data(league, season - 1)

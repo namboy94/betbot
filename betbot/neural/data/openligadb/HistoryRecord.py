@@ -98,30 +98,28 @@ class HistoryRecord:
         points, goals_for, goals_against = \
             self.get_stats(season, matchday, finished)
 
-        start_season = season
-        max_matchday = None
         if matchday - interval <= 0 and (season - 1) in self._history:
-            start_season = season - 1
-            max_matchday = max(self._history[start_season].keys())
+            max_matchday = max(self._history[season - 1].keys())
             start_matchday = max_matchday - (interval - matchday)
+            start_points, start_goals_for, start_goals_against = \
+                self.get_stats(season - 1, start_matchday, False)
+            end_points, end_goals_for, end_goals_against = \
+                self.get_stats(season - 1, max_matchday, False)
+            points += (end_points - start_points)
+            goals_for += (end_goals_for - start_goals_for)
+            goals_against += (end_goals_against - start_goals_against)
         elif matchday == 1:
             return 0, 0, 0
+        elif matchday - interval <= 0:
+            pass  # In the first season, simply use current stats
         else:
-            start_matchday = max(1, matchday - interval)
-
-        start_points, start_goals_for, start_goals_against = \
-            self.get_stats(start_season, start_matchday, False)
-
-        if max_matchday is None:
+            start_points, start_goals_for, start_goals_against = \
+                self.get_stats(season, matchday - interval, False)
             points -= start_points
             goals_for -= start_goals_for
             goals_against -= start_goals_against
 
-        else:
-            end_points, end_goals_for, end_goals_against = \
-                self.get_stats(start_season, max_matchday, False)
-            points += (end_points - start_points)
-            goals_for += (end_goals_for - start_goals_for)
-            goals_against += (end_goals_against - start_goals_against)
-
         return points, goals_for, goals_against
+
+    def get_max_matchday(self, season: int):
+        return max(self._history[season].keys())

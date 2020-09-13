@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List
+from typing import List, Union
 from betbot.neural.data.openligadb.HistoryRecord import HistoryRecord
 
 
@@ -43,40 +43,48 @@ class InputVector:
         :param home_team_history: The table history of the home team
         :param away_team_history: The table history of the away team
         """
-        self.home_total_points, self.home_total_goals_for, \
-            self.home_total_goals_against = \
-            home_team_history.get_stats(season, matchday, finished)
-        self.away_total_points, self.away_total_goals_for, \
-            self.away_total_goals_against = \
-            away_team_history.get_stats(season, matchday, finished)
+        self.season = season
+        self.matchday = matchday
+        self.home_team_history = home_team_history
+        self.away_team_history = away_team_history
+        self.current_stats = \
+            list(home_team_history.get_stats(season, matchday, finished)) + \
+            list(away_team_history.get_stats(season, matchday, finished))
+        self.history_stats = {}
 
-        self.home_points_last_5_matches, self.home_goals_for_last_5_matches, \
-            self.home_goals_against_last_5_matches = \
-            home_team_history.get_stats_interval(
-                season, matchday, 5, finished
-            )
-        self.away_points_last_5_matches, self.away_goals_for_last_5_matches,\
-            self.away_goals_against_last_5_matches = \
-            away_team_history.get_stats_interval(
-                season, matchday, 5, finished
-            )
+        for interval in [8]:
+            self.history_stats[interval] = \
+                list(home_team_history.get_stats_interval(
+                    season, matchday, interval, finished
+                )) + \
+                list(away_team_history.get_stats_interval(
+                    season, matchday, interval, finished
+                ))
 
     @property
-    def vector(self) -> List[int]:
+    def vector(self) -> List[float]:
         """
         :return: The input vector as a list of integers
         """
-        return [
-            self.home_total_points,
-            self.home_total_goals_for,
-            self.home_total_goals_against,
-            self.home_points_last_5_matches,
-            self.home_goals_for_last_5_matches,
-            self.home_goals_against_last_5_matches,
-            self.away_total_points,
-            self.away_total_goals_for,
-            self.away_total_goals_against,
-            self.away_points_last_5_matches,
-            self.away_goals_for_last_5_matches,
-            self.away_goals_against_last_5_matches
-        ]
+        vector = [self.matchday] + self.current_stats
+        for key in sorted(self.history_stats.keys()):
+            vector += self.history_stats[key]
+        return vector
+
+    def normalize(self, vector: List[Union[int, float]]) -> List[float]:
+        """
+        Normalizes the input vector to values between 0 and 1
+        :param vector: The vector to normalize
+        :return: The normalized vector
+        """
+        vector = list(vector)  # copy
+        vector[0] = \
+            vector[0] / self.home_team_history.get_max_matchday(self.season)
+        for overall_index in range(1, 7):
+            vector[overall_index] = \
+                min(1.0, vector[overall_index] / (self.matchday * 3))
+
+        for history_index in range(7, len(vector)):
+            vector[history_index] = \
+                min(1.0, vector[history_index] / (5 * 3))
+        return vector

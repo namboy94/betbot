@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List
+from typing import List, Tuple
 from betbot.neural.keras.Trainer import Trainer
 
 
@@ -27,17 +27,17 @@ class BetPredictorTrainer(Trainer):
     Trainer Class that specifies an evaluation for bets
     """
 
-    def evaluate(
+    def _evaluate(
             self,
             predictions: List[List[float]],
             expected_output: List[List[float]]
-    ) -> float:
+    ) -> Tuple[float, float]:
         """
         Evaluates predictions of the neural network
         :param predictions: The predictions to check
         :param expected_output: The expected output for the predictions
-        :return: A percentage of how well the prediction matches the
-                 expected output
+        :return: The evaluation score and a percentage of how well the
+                 prediction matches the expected output
         """
         points = 0
 
@@ -58,7 +58,6 @@ class BetPredictorTrainer(Trainer):
             if predicted[0] == expected[0] or predicted[1] == expected[1]:
                 points += 3
 
-        average_points = points / len(predictions)
-        print(f"Average Points: {average_points}")
-        score = 100 * average_points / 15
-        return score
+        score = points / len(predictions)
+        accuracy = 100 * score / 15
+        return score, accuracy

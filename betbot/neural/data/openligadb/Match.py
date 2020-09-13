@@ -42,9 +42,13 @@ class Match:
         """
         finished = match_json["MatchIsFinished"]
         if finished:
-            results = match_json["MatchResults"][0]
-            home_score = results["PointsTeam1"]
-            away_score = results["PointsTeam2"]
+            results = match_json["MatchResults"]
+            if results[0]["ResultName"] == "Endergebnis":
+                result = results[0]
+            else:
+                result = results[1]
+            home_score = result["PointsTeam1"]
+            away_score = result["PointsTeam2"]
         else:
             home_score, away_score = None, None
 

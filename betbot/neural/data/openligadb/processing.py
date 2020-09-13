@@ -106,12 +106,12 @@ def calculate_history(match_data: Dict[int, Dict[int, List[Match]]]) \
     return history
 
 
-def generate_training_data(leagues: List[str], seasons: List[int]) \
+def generate_training_data(league_seasons: List[Tuple[str, int]]) \
         -> List[Tuple[InputVector, OutputVector]]:
     """
     Creates training data for multiple seasons and leagues
-    :param leagues: The leagues for which to generate training data
-    :param seasons: The seasons for which to generate training data
+    :param league_seasons: The leagues+seasons for which to generate
+                           training data
     :return: The training data as a list of input/output vector tuples
     """
     vectors = []
@@ -121,8 +121,15 @@ def generate_training_data(leagues: List[str], seasons: List[int]) \
     all_tables = {}
     histories = {}
 
+    leagues = {}
+    for league, season in league_seasons:
+        if league not in leagues:
+            leagues[league] = []
+        leagues[league].append(season)
+        leagues[league].sort()
+
     print("Loading data...")
-    for league in leagues:
+    for league, seasons in leagues.items():
         all_teams[league] = {}
         all_matches[league] = {}
         all_tables[league] = {}
@@ -136,10 +143,15 @@ def generate_training_data(leagues: List[str], seasons: List[int]) \
         histories[league] = calculate_history(all_matches[league])
     print("Done!")
 
-    for league in leagues:
+    for league, seasons in leagues.items():
         for season in seasons:
             match_data = all_matches[league][season]
             for matchday, matches in match_data.items():
+
+                if matchday < 6 and season == seasons[0]:
+                    # Skip matches where we don't have enough historical data
+                    continue
+
                 for match in matches:
 
                     if not match.finished:  # Exclude unfinished matches
@@ -170,9 +182,14 @@ def generate_training_csv(csv_path: str):
     :param csv_path: The path to the CSV file
     :return: None
     """
-    leagues = ["bl1", "bl2", "bl3"]
-    seasons = list(range(2010, 2020))
-    vectors = generate_training_data(leagues, seasons)
+    league_seasons = []
+    # for intl in ["PD", "SA", "PL"]:
+    #     for season in range(2010, 2016):
+    #         league_seasons.append((intl, season))
+    for bl in ["bl1", "bl2", "bl3"]:
+        for season in range(2010, 2020):
+            league_seasons.append((bl, season))
+    vectors = generate_training_data(league_seasons)
     training_data = []
 
     for input_vector, output_vector in vectors:
