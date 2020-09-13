@@ -62,7 +62,6 @@ class TableHistoryNNPredictor(Predictor):
         predictions = self.model.predict(vectors).tolist()
 
         for i, match in enumerate(matches):
-            print(predictions[i])
             result = [int(round(x)) for x in predictions[i]]
             bets.append(Bet(match.id, result[0], result[1]))
 
