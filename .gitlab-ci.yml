@@ -33,6 +33,7 @@ unittest:
   tags: [docker]
   only: [master, develop]
   script:
+    - pip install tensorflow
     - python-unittest
 
 type_check:
@@ -51,6 +52,7 @@ docgen:
   stage: stats
   tags: [docker]
   script:
+    - pip install tensorflow
     - sphinx-docgen
 
 deploy_app:
