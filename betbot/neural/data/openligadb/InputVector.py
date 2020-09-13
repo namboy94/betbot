@@ -52,7 +52,7 @@ class InputVector:
             list(away_team_history.get_stats(season, matchday, finished))
         self.history_stats = {}
 
-        for interval in [7]:
+        for interval in [5]:
             self.history_stats[interval] = \
                 list(home_team_history.get_stats_interval(
                     season, matchday, interval, finished
@@ -62,7 +62,7 @@ class InputVector:
                 ))
 
     @property
-    def vector(self) -> List[float]:
+    def vector(self) -> List[int]:
         """
         :return: The input vector as a list of integers
         """

@@ -52,7 +52,7 @@ def load_data(league: str, season: int) \
         Match(league, season, match_json, teams)
         for match_json in match_data
     ]
-    matches = {}
+    matches: Dict[int, List[Match]] = {}
     for match in _matches:
         if match.matchday not in matches:
             matches[match.matchday] = []
@@ -68,7 +68,7 @@ def calculate_tables(matches: Dict[int, List[Match]]) \
     :param matches: The matches in the season
     :return: The tables, one for each matchday
     """
-    tables = {}
+    tables: Dict[int, Dict[int, TableEntry]] = {}
     for matchday, matchday_matches in matches.items():
         tables[matchday] = {}
         previous_table = tables.get(matchday - 1)
@@ -116,12 +116,12 @@ def generate_training_data(league_seasons: List[Tuple[str, int]]) \
     """
     vectors = []
 
-    all_teams = {}
-    all_matches = {}
-    all_tables = {}
+    all_teams: Dict[str, Dict[int, Dict[int, Team]]] = {}
+    all_matches: Dict[str, Dict[int, Dict[int, List[Match]]]] = {}
+    all_tables: Dict[str, Dict[int, Dict[int, Dict[int, TableEntry]]]] = {}
     histories = {}
 
-    leagues = {}
+    leagues: Dict[str, List[int]] = {}
     for league, season in league_seasons:
         if league not in leagues:
             leagues[league] = []
