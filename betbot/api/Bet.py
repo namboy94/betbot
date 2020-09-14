@@ -44,3 +44,9 @@ class Bet:
             f"{self.match_id}-home": self.home_score,
             f"{self.match_id}-away": self.away_score
         }
+
+    def __str__(self) -> str:
+        """
+        :return: A string representation of the bet
+        """
+        return f"[{self.match_id}] {self.home_score}:{self.away_score}"

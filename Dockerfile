@@ -4,6 +4,7 @@ MAINTAINER Hermann Krumrey <hermann@krumreyh.com>
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt update && apt install -y python3 python3-pip
+RUN pip3 install tensorflow keras
 
 ADD . bot
 RUN cd bot && python3 setup.py install

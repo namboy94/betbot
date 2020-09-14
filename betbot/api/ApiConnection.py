@@ -100,6 +100,8 @@ class ApiConnection:
         bet_dict = {}
         for bet in bets:
             bet_dict.update(bet.to_dict())
+            self.logger.info(f"Generated bet: {bet}")
+
         data = self.execute_api_call("bet", "PUT", True, bet_dict)
         if data["status"] != "ok":
             self.logger.error("Failed to place bets")

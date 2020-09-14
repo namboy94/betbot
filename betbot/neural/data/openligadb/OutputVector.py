@@ -17,16 +17,23 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Type, List
-from betbot.prediction.TableHistoryNNPredictor import TableHistoryNNPredictor
-from betbot.prediction.Predictor import Predictor
-from betbot.prediction.DrawPredictor import DrawPredictor
-from betbot.prediction.RandomPredictor import RandomPredictor
-from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
+from typing import List
 
-predictors: List[Type[Predictor]] = [
-    DrawPredictor,
-    RandomPredictor,
-    TipicoOddsPredictor,
-    TableHistoryNNPredictor
-]
+
+class OutputVector:
+    """
+    Class that models the output vector for a neural network training dataset
+    """
+
+    def __init__(self, home_score: int, away_score: int):
+        """
+        Initializes the OutputVector object
+        :param home_score: The home score
+        :param away_score: The away score
+        """
+        self.home_score = home_score
+        self.away_score = away_score
+
+    @property
+    def vector(self) -> List[int]:
+        return [self.home_score, self.away_score]

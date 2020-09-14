@@ -16,17 +16,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
-
-from typing import Type, List
-from betbot.prediction.TableHistoryNNPredictor import TableHistoryNNPredictor
-from betbot.prediction.Predictor import Predictor
-from betbot.prediction.DrawPredictor import DrawPredictor
-from betbot.prediction.RandomPredictor import RandomPredictor
-from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
-
-predictors: List[Type[Predictor]] = [
-    DrawPredictor,
-    RandomPredictor,
-    TipicoOddsPredictor,
-    TableHistoryNNPredictor
-]

@@ -42,7 +42,9 @@ if __name__ == "__main__":
         install_requires=[
             "requests",
             "beautifulsoup4",
-            "puffotter"
+            "puffotter",
+            "tensorflow",
+            "keras"
         ],
         include_package_data=True,
         zip_safe=False

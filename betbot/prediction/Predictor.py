@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
+import os
 from typing import List
 from betbot.api.Match import Match
 from betbot.api.Bet import Bet
@@ -26,6 +27,17 @@ class Predictor:
     """
     Class that specifies required methods for predictor objects
     """
+
+    def __init__(self):
+        """
+        Initializes the model directory if it does not exist
+        """
+        self.model_dir = os.path.join(
+            os.path.expanduser("~"),
+            ".config/betbot"
+        )
+        if not os.path.isdir(self.model_dir):
+            os.makedirs(self.model_dir)
 
     @classmethod
     def name(cls) -> str:

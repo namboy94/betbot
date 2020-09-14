@@ -30,7 +30,8 @@ class Match:
             _id: int,
             matchday: int,
             home_team: str,
-            away_team: str
+            away_team: str,
+            finished: bool
     ):
         """
         Initializes the Match
@@ -38,11 +39,13 @@ class Match:
         :param matchday: The matchday of the match
         :param home_team: The name of the home team
         :param away_team: The name of the away team
+        :param finished: Whether the match is already finished or not
         """
         self.id = _id
         self.matchday = matchday
         self.home_team = home_team
         self.away_team = away_team
+        self.finished = finished
 
     @classmethod
     def from_json(cls, json_data: Dict[str, Any]):
@@ -55,5 +58,6 @@ class Match:
             json_data["id"],
             json_data["matchday"],
             json_data["home_team"]["abbreviation"],
-            json_data["away_team"]["abbreviation"]
+            json_data["away_team"]["abbreviation"],
+            json_data["finished"]
         )
