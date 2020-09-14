@@ -93,6 +93,7 @@ class BetOddsTrainer(BetPredictorTrainer):
                 for match in data_dicts:
 
                     input_vector = []
+                    keys = []
                     for bookkeeper in [
                         "B365",
                         "BW",
@@ -102,7 +103,12 @@ class BetOddsTrainer(BetPredictorTrainer):
                     ]:
                         for category in ["H", "A", "D"]:
                             key = bookkeeper + category
+                            keys.append(key)
                             input_vector.append(float(match[key]))
+
+                    keys += [
+
+                    ]
 
                     vectors.append((
                         input_vector,

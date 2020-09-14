@@ -6,7 +6,7 @@ stages:
   - release
 
 default:
-  image: namboy94/ci-docker-environment:0.9.0
+  image: namboy94/ci-docker-environment:0.10.0
   before_script:
     - echo "$SERVER_ACCESS_KEY" > ~/.ssh/id_rsa
     - chmod 0600 ~/.ssh/id_rsa
@@ -33,7 +33,6 @@ unittest:
   tags: [docker]
   only: [master, develop]
   script:
-    - pip install tensorflow
     - python-unittest
 
 type_check:
@@ -52,7 +51,6 @@ docgen:
   stage: stats
   tags: [docker]
   script:
-    - pip install tensorflow==2.3.0
     - sphinx-docgen
 
 deploy_app:
