@@ -13,6 +13,5 @@ def load_odds(country: str, league: str, season: int):
         print(x.text)
 
 
-
 if __name__ == '__main__':
     load_odds("germany", "bundesliga", 2019)

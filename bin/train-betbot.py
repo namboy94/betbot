@@ -24,6 +24,7 @@ from betbot import sentry_dsn
 from keras.models import Sequential
 from keras.layers import Dense, Flatten
 from puffotter.init import cli_start, argparse_add_verbosity
+from betbot.neural.keras.BetOddsTrainer import BetOddsTrainer
 from betbot.neural.keras.TableHistoryTrainer import TableHistoryTrainer
 
 
@@ -33,7 +34,13 @@ def main(args: argparse.Namespace):
     :param args: The command line arguments
     :return: None
     """
-    trainer = TableHistoryTrainer(args.output_dir)
+    if args.trainer == "betodds":
+        trainer = BetOddsTrainer(args.output_dir)
+    elif args.trainer == "tablehistory":
+        trainer = TableHistoryTrainer(args.output_dir)
+    else:
+        return
+
     trainer.name = args.name
 
     if args.refresh_training_data:
@@ -84,6 +91,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("output_dir")
     parser.add_argument("name")
+    parser.add_argument("trainer", choices={"betodds", "tablehistory"})
     parser.add_argument("--iterations", type=int, default=4)
     parser.add_argument("--epochs", type=int, default=64)
     parser.add_argument("--batch-size", type=int, default=32)

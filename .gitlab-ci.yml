@@ -52,7 +52,7 @@ docgen:
   stage: stats
   tags: [docker]
   script:
-    - pip install tensorflow
+    - pip install tensorflow==2.3.0
     - sphinx-docgen
 
 deploy_app:
