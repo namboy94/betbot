@@ -43,7 +43,6 @@ if __name__ == "__main__":
             "requests",
             "beautifulsoup4",
             "puffotter",
-            "tensorflow",
             "keras"
         ],
         include_package_data=True,

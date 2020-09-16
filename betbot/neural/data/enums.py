@@ -17,23 +17,30 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import List
+from enum import Enum
 
 
-class OutputVector:
+class Bookmakers(Enum):
     """
-    Class that models the output vector for a neural network training dataset
+    Class that defines the various bookmakers
     """
+    B365 = "b365"
+    BWIN = "bw"
+    INTERWETTEN = "iw"
 
-    def __init__(self, home_score: int, away_score: int):
-        """
-        Initializes the OutputVector object
-        :param home_score: The home score
-        :param away_score: The away score
-        """
-        self.home_score = home_score
-        self.away_score = away_score
 
-    @property
-    def vector(self) -> List[int]:
-        return [self.home_score, self.away_score]
+class Countries(Enum):
+    """
+    Class that defines the various countries
+    """
+    ENGLAND = "england"
+    SCOTLAND = "scotland"
+    GERMANY = "germany"
+    ITALY = "italy"
+    SPAIN = "spain"
+    FRANCE = "france"
+    NETHERLANDS = "netherlands"
+    BELGIUM = "belgium"
+    PORTUGAL = "portugal"
+    TURKEY = "turkey"
+    GREECE = "greece"

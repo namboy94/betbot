@@ -21,7 +21,7 @@ import os
 import random
 import logging
 from typing import Tuple, List, Optional, Callable
-from keras.models import Model, load_model
+from tensorflow.keras.models import Model, load_model
 
 
 class Trainer:
@@ -157,7 +157,7 @@ class Trainer:
                 epochs=epochs,
                 batch_size=batch_size,
                 validation_data=(valid_in, valid_out),
-                verbose=0
+                verbose=1
             )
             predictions = [
                 [float(x) for x in vector]

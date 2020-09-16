@@ -41,13 +41,25 @@ class BetPredictorTrainer(Trainer):
         """
         points = 0
 
+        correct_winners = 0
+        correct_results = 0
+        draws = 0
         for i, expected in enumerate(expected_output):
             predicted = [float(round(x)) for x in predictions[i]]
+
+            print(f"{predicted}|{expected}|{predictions[i]}")
+            if int(predicted[0]) == int(predicted[1]):
+                draws += 1
+
+            if predicted[0] == expected[0] and predicted[1] == expected[1]:
+                # points += 5
+                correct_results += 1
 
             predicted_diff = predicted[0] - predicted[1]
             expected_diff = expected[0] - expected[1]
 
             if predicted_diff * expected_diff > 0:
+                correct_winners += 1
                 points += 7
             elif predicted_diff == 0 and expected_diff == 0:
                 points += 7
@@ -60,4 +72,7 @@ class BetPredictorTrainer(Trainer):
 
         score = points / len(predictions)
         accuracy = 100 * score / 15
+        print(f"Winner Accuracy: {100 * correct_winners / len(predictions)}%")
+        print(f"Correct Accuracy: {100 * correct_results / len(predictions)}%")
+        print(f"Draw Percentage: {100 * draws / len(predictions)}%")
         return score, accuracy

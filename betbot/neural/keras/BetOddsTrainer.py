@@ -22,8 +22,8 @@ import csv
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Dict
-from keras.models import Model, Sequential
-from keras.layers import Flatten, Dense
+from tensorflow.keras.models import Model, Sequential
+from tensorflow.keras.layers import Flatten, Dense
 from betbot.neural.keras.BetPredictorTrainer import BetPredictorTrainer
 
 

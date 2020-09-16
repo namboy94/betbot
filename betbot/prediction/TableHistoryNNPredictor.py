@@ -23,10 +23,7 @@ from datetime import datetime
 from betbot.api.Bet import Bet
 from betbot.api.Match import Match
 from betbot.prediction.Predictor import Predictor
-from betbot.neural.keras.TableHistoryTrainer import TableHistoryTrainer
-from betbot.neural.data.openligadb.InputVector import InputVector
-from betbot.neural.data.openligadb.processing import calculate_history, \
-    load_data
+from betbot.neural.keras.MatchHistoryTrainer import MatchHistoryTrainer
 
 
 class TableHistoryNNPredictor(Predictor):

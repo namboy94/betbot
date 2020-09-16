@@ -16,3 +16,25 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
+
+from typing import List
+
+
+class Vector:
+    """
+    Class that models a vector
+    """
+
+    @property
+    def vector(self) -> List[float]:
+        """
+        :return: The vector as a list of float values
+        """
+        raise NotImplementedError()
+
+    @classmethod
+    def legend(cls) -> List[str]:
+        """
+        :return: Strings describing the individual parts of the vectors
+        """
+        raise NotImplementedError()
