@@ -26,7 +26,9 @@ class Bookmakers(Enum):
     """
     B365 = "b365"
     BWIN = "bw"
-    INTERWETTEN = "iw"
+    # INTERWETTEN = "iw"
+    WILLIAM_HILL = "wh"
+    # VC = "vc"
 
 
 class Countries(Enum):

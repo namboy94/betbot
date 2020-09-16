@@ -57,7 +57,6 @@ class MatchHistoryTrainer(BetPredictorTrainer):
         model = Sequential()
         model.add(Flatten(input_shape=(len(InputVector.legend()),)))
         model.add(Dense(len(InputVector.legend()) - 10, activation="sigmoid"))
-        model.add(Dense(len(InputVector.legend()) - 20, activation="sigmoid"))
         model.add(Dense(len(OutputVector.legend()), activation="relu"))
         return model
 
@@ -68,6 +67,12 @@ class MatchHistoryTrainer(BetPredictorTrainer):
         :return: None
         """
         def loss(expected, predicted):
+            """
+            Special loss function that takes goal difference into account
+            :param expected: THe expected values
+            :param predicted: The predicted values
+            :return: The loss function definition
+            """
             expected_home = backend.gather(expected, [0])
             expected_away = backend.gather(expected, [1])
             predicted_home = backend.gather(predicted, [0])
@@ -79,6 +84,6 @@ class MatchHistoryTrainer(BetPredictorTrainer):
                 backend.square(predicted_diff - expected_diff))
             mse = backend.mean(backend.square(predicted - expected))
 
-            return mse
+            return mse + backend.sqrt(mse_diff)
 
-        model.compile(loss="mse", optimizer="sgd")
+        model.compile(loss=loss, optimizer="sgd")

@@ -21,7 +21,7 @@ import os
 import random
 import logging
 from typing import Tuple, List, Optional, Callable
-from tensorflow.keras.models import Model, load_model
+from tensorflow.keras.models import Model
 
 
 class Trainer:
@@ -38,7 +38,7 @@ class Trainer:
         if not os.path.isdir(model_dir):
             os.makedirs(model_dir)
         self.name = self.__class__.__name__
-        self.model_path = os.path.join(model_dir, self.name)
+        self.weights_path = os.path.join(model_dir, self.name + ".h5")
         self.logger = logging.getLogger(self.name)
 
     def load_training_data(self, force_refresh: bool) \
@@ -82,9 +82,10 @@ class Trainer:
     def load_trained_model(
             self,
             iterations: int = 4,
-            epochs: int = 64,
-            batch_size: int = 32,
+            epochs: int = 32,
+            batch_size: int = 64,
             force_retrain: bool = False,
+            minimum_accuracy: float = 0.0,
             custom_model_fn: Optional[Callable[[], Model]] = None,
             custom_compile_fn: Optional[Callable[[Model], None]] = None
     ) -> Model:
@@ -95,21 +96,27 @@ class Trainer:
         :param epochs: The amount of epochs to train
         :param batch_size: The batch size to use when training
         :param force_retrain: Whether or not to force retraining
+        :param minimum_accuracy: Optional value for minimum accuracy
         :param custom_model_fn: Allows using a custom model to be trained
         :param custom_compile_fn: Allows using a custom compile function
         :return: The trained model
         """
-        if force_retrain or not os.path.exists(self.model_path):
-            model = self.train(
-                iterations,
-                epochs,
-                batch_size,
-                custom_model_fn,
-                custom_compile_fn
-            )[0]
+        if force_retrain or not os.path.exists(self.weights_path):
+            accuracy = -1.0
+            model = None
+            while accuracy < minimum_accuracy:
+                model, _, accuracy, _, _ = self.train(
+                    iterations,
+                    epochs,
+                    batch_size,
+                    custom_model_fn,
+                    custom_compile_fn
+                )
+            assert model is not None
         else:
-            model = load_model(self.model_path)
-        model.save(self.model_path)
+            model = self._define_model()
+            model.load_weights(self.weights_path)
+        model.save_weights(self.weights_path)
         return model
 
     def train(
@@ -163,7 +170,10 @@ class Trainer:
                 [float(x) for x in vector]
                 for vector in model.predict(test_in).tolist()
             ]
-            score, accuracy = self._evaluate(predictions, test_out)
+            try:
+                score, accuracy = self._evaluate(predictions, test_out)
+            except ValueError:
+                score, accuracy = 0, 0.0
             scores.append((score, accuracy))
 
             self.logger.info(f"Finished training: "

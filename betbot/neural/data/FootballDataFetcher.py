@@ -20,6 +20,8 @@ LICENSE"""
 import os
 import csv
 import requests
+import dryscrape
+from datetime import datetime
 from io import StringIO
 from bs4 import BeautifulSoup
 from typing import List, Tuple, Dict, Optional
@@ -28,6 +30,7 @@ from betbot.neural.data.vector.OutputVector import OutputVector
 from betbot.neural.data.Match import Match
 from betbot.neural.data.DataFetcher import DataFetcher
 from betbot.neural.data.enums import Bookmakers, Countries
+from betbot.neural.data.names import oddsportal_to_football_data
 
 
 class FootballDataFetcher(DataFetcher):
@@ -167,8 +170,74 @@ class FootballDataFetcher(DataFetcher):
 
         return vector_matches
 
-    def load_oddsportal_matches(self) -> List[Match]:
-        return []
+    @staticmethod
+    def load_oddsportal_matches() -> List[Match]:
+        session = dryscrape.Session()
+        headers = {"User-Agent": "Mozilla/5.0"}
+        bl_url = "https://www.oddsportal.com/soccer/germany/bundesliga/"
+        resp = requests.get(bl_url, headers=headers)
+        soup = BeautifulSoup(resp.text, "html.parser")
+        entries = soup.find("table", {"id": "tournamentTable"})
+        matches = [x for x in entries.find_all("tr") if "\xa0---" in x.text]
+        urls = [
+            os.path.join(
+                "https://www.oddsportal.com",
+                x.select("a")[1]["href"][1:]
+            ) for x in matches
+        ]
+
+        matches = []
+        bookmakers = {
+            "bet365": Bookmakers.B365,
+            "bwin": Bookmakers.BWIN,
+            "William Hill": Bookmakers.WILLIAM_HILL
+        }
+        for url in urls:
+            session.visit(url)
+            match_soup = BeautifulSoup(session.body(), "html.parser")
+
+            teams = match_soup.find("h1").text
+            home_team = teams.split("-")[0].strip()
+            away_team = teams.split("-")[1].strip()
+
+            home_team = oddsportal_to_football_data.get(home_team, home_team)
+            away_team = oddsportal_to_football_data.get(away_team, away_team)
+
+            date_string = match_soup.find("p", "date").text
+            date = datetime.strptime(date_string, "%A, %d %b %Y, %H:%M")
+
+            odds_table = match_soup.find("table", {"class": "detail-odds"})
+            if odds_table is None:
+                continue
+            odds = {}
+            for row in odds_table.find_all("tr"):
+                tds = row.find_all("td")
+                if len(tds) < 1:
+                    continue
+                name = tds[0].text.strip()
+                if name in bookmakers:
+                    bookmaker_odds = []
+                    for index in range(1, 4):
+                        fraction = [int(x) for x in tds[index].text.split("/")]
+                        odds_number = 1.0 + (fraction[0] / fraction[1])
+                        bookmaker_odds.append(odds_number)
+                    bookmaker_odds_tuple = (
+                        bookmaker_odds[0], bookmaker_odds[1], bookmaker_odds[2]
+                    )
+                    odds[bookmakers[name]] = bookmaker_odds_tuple
+
+            matches.append(Match(
+                "germany",
+                1,
+                2020,
+                date,
+                False,
+                home_team,
+                away_team,
+                None, None, None, None,
+                odds
+            ))
+        return matches
 
     def _load_csv_urls(self, limit_by: Optional[List[Countries]] = None) \
             -> Dict[str, Dict[int, Dict[int, str]]]:

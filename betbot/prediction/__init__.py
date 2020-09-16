@@ -18,7 +18,7 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import Type, List
-from betbot.prediction.TableHistoryNNPredictor import TableHistoryNNPredictor
+from betbot.prediction.MatchHistoryNNPredictor import TableHistoryNNPredictor
 from betbot.prediction.Predictor import Predictor
 from betbot.prediction.DrawPredictor import DrawPredictor
 from betbot.prediction.RandomPredictor import RandomPredictor
