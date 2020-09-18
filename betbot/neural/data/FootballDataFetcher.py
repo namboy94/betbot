@@ -19,11 +19,13 @@ LICENSE"""
 
 import os
 import csv
+import time
 import requests
 import dryscrape
 from datetime import datetime
 from io import StringIO
 from bs4 import BeautifulSoup
+from webkit_server import InvalidResponseError
 from typing import List, Tuple, Dict, Optional
 from betbot.neural.data.vector.InputVector import InputVector
 from betbot.neural.data.vector.OutputVector import OutputVector
@@ -154,7 +156,19 @@ class FootballDataFetcher(DataFetcher):
         ]
         current_matches = [x for x in _current_matches if x is not None]
         if len(current_matches) == 0:
-            current_matches = self.load_oddsportal_matches()
+            retry = 0
+            while retry < 3:
+                retry += 1
+                try:
+                    current_matches = self.load_oddsportal_matches()
+                except InvalidResponseError:
+                    self.logger.warning("Failed to fetch data from oddsportal")
+                    if retry < 3:
+                        self.logger.info("Retrying...")
+                        time.sleep(15)
+                    else:
+                        self.logger.warning("Couldn't fetch data")
+                        return []
 
         _all_matches = [
             Match.from_football_data(x)

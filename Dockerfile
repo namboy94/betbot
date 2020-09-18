@@ -10,4 +10,4 @@ ADD . bot
 RUN cd bot && python3 setup.py install
 
 WORKDIR bot
-CMD ["xvfb-run", "multi-betbot", "-v"]
+CMD ["docker_start.sh", "-v"]
