@@ -1,3 +1,7 @@
+V 0.5.3:
+  - More oddsportal fixes
+  - Fixed matchday fetching of football-data
+  - Added pre-trained model weights
 V 0.5.2:
   - Fixed oddsportal int conversion issues
 V 0.5.1:

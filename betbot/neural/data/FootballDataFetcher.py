@@ -125,7 +125,7 @@ class FootballDataFetcher(DataFetcher):
 
         csv_urls = self._load_csv_urls([country_enum])
         current_season = max(csv_urls[country][league].keys())
-        now_url = "https://www.football-data.co.uk/matches.php"
+        now_url = "https://www.football-data.co.uk/fixtures.csv"
         current_url = csv_urls[country][league][current_season]
         lower_url = csv_urls[country][league + 1][current_season]
         previous_url = csv_urls[country][league][current_season - 1]
@@ -146,15 +146,23 @@ class FootballDataFetcher(DataFetcher):
 
         with StringIO(requests.get(now_url).text) as f:
             data = [x for x in csv.reader(f)]
-        keys = data.pop(0)
-        _current_matches = [
-            Match.from_football_data(
-                {keys[j]: data[i][j] for j in range(len(data))}
-            )
-            for i in range(len(keys))
-            if data[i][0] == league_identifier
-        ]
-        current_matches = [x for x in _current_matches if x is not None]
+            keys = [x.lower() for x in data.pop(0)]
+            data = [x for x in data if x[0] == league_identifier]
+
+        current_matches = []
+        base_match_dict = {
+            "country": country,
+            "season": str(current_season),
+            "league": str(league),
+            "finished": str(False)
+        }
+        for item in data:
+            match_dict = {keys[i]: item[i] for i in range(len(keys))}
+            match_dict.update(base_match_dict)
+            match = Match.from_football_data(match_dict)
+            if match is not None:
+                current_matches.append(match)
+
         if len(current_matches) == 0:
             retry = 0
             self.logger.info("football-data not available, using oddportal")
@@ -256,10 +264,13 @@ class FootballDataFetcher(DataFetcher):
                 if name in bookmakers:
                     bookmaker_odds = []
                     for index in range(1, 4):
-                        fraction = [
-                            float(x) for x in tds[index].text.split("/")
-                        ]
-                        odds_number = 1.0 + (fraction[0] / fraction[1])
+                        try:
+                            odds_number = float(tds[index].text)
+                        except ValueError:
+                            fraction = [
+                                int(x) for x in tds[index].text.split("/")
+                            ]
+                            odds_number = 1.0 + (fraction[0] / fraction[1])
                         bookmaker_odds.append(odds_number)
                     bookmaker_odds_tuple = (
                         bookmaker_odds[0], bookmaker_odds[1], bookmaker_odds[2]
