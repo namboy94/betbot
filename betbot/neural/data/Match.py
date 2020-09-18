@@ -63,6 +63,11 @@ class Match:
             except (KeyError, ValueError):
                 return None
 
+        away_ht = None if not data.get("htag") else int(data["htag"])
+        away_ft = None if not data.get("ftag") else int(data["ftag"])
+        home_ht = None if not data.get("hthg") else int(data["hthg"])
+        home_ft = None if not data.get("fthg") else int(data["fthg"])
+
         return cls(
             country=data["country"],
             league=int(data["league"]),
@@ -71,9 +76,9 @@ class Match:
             finished=bool(data["finished"]),
             home_team=data["hometeam"],
             away_team=data["awayteam"],
-            home_ht_score=int(data["hthg"]),
-            home_ft_score=int(data["fthg"]),
-            away_ht_score=int(data["htag"]),
-            away_ft_score=int(data["ftag"]),
+            home_ht_score=home_ht,
+            home_ft_score=home_ft,
+            away_ht_score=away_ht,
+            away_ft_score=away_ft,
             bet_odds=bet_odds
         )
