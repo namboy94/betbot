@@ -17,16 +17,32 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Type, List
-from betbot.prediction.MatchHistoryNNPredictor import TableHistoryNNPredictor
-from betbot.prediction.Predictor import Predictor
-from betbot.prediction.DrawPredictor import DrawPredictor
-from betbot.prediction.RandomPredictor import RandomPredictor
-from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
+from enum import Enum
 
-predictors: List[Type[Predictor]] = [
-    DrawPredictor,
-    RandomPredictor,
-    TipicoOddsPredictor,
-    TableHistoryNNPredictor
-]
+
+class Bookmakers(Enum):
+    """
+    Class that defines the various bookmakers
+    """
+    B365 = "b365"
+    BWIN = "bw"
+    # INTERWETTEN = "iw"
+    WILLIAM_HILL = "wh"
+    # VC = "vc"
+
+
+class Countries(Enum):
+    """
+    Class that defines the various countries
+    """
+    ENGLAND = "england"
+    SCOTLAND = "scotland"
+    GERMANY = "germany"
+    ITALY = "italy"
+    SPAIN = "spain"
+    FRANCE = "france"
+    NETHERLANDS = "netherlands"
+    BELGIUM = "belgium"
+    PORTUGAL = "portugal"
+    TURKEY = "turkey"
+    GREECE = "greece"

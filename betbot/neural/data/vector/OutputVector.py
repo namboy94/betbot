@@ -18,22 +18,31 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import List
+from dataclasses import dataclass
+from betbot.neural.data.vector.Vector import Vector
 
 
-class OutputVector:
+@dataclass
+class OutputVector(Vector):
     """
-    Class that models the output vector for a neural network training dataset
+    Class that models an output vector for a match
     """
-
-    def __init__(self, home_score: int, away_score: int):
-        """
-        Initializes the OutputVector object
-        :param home_score: The home score
-        :param away_score: The away score
-        """
-        self.home_score = home_score
-        self.away_score = away_score
+    home_goals: int
+    away_goals: int
 
     @property
-    def vector(self) -> List[int]:
-        return [self.home_score, self.away_score]
+    def vector(self) -> List[float]:
+        """
+        :return: The vector as a list of float values
+        """
+        return [float(self.home_goals), float(self.away_goals)]
+
+    @classmethod
+    def legend(cls) -> List[str]:
+        """
+        :return: Strings describing the individual parts of the vectors
+        """
+        return [
+            "home_team_ft_score",
+            "away_team_ft_score"
+        ]

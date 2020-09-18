@@ -43,8 +43,8 @@ if __name__ == "__main__":
             "requests",
             "beautifulsoup4",
             "puffotter",
-            "tensorflow",
-            "keras"
+            "tensorflow>=2.0.0",
+            "dryscrape"
         ],
         include_package_data=True,
         zip_safe=False
