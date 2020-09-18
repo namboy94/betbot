@@ -157,6 +157,7 @@ class FootballDataFetcher(DataFetcher):
         current_matches = [x for x in _current_matches if x is not None]
         if len(current_matches) == 0:
             retry = 0
+            self.logger.info("football-data not available, using oddportal")
             while retry < 3:
                 retry += 1
                 try:
@@ -255,7 +256,9 @@ class FootballDataFetcher(DataFetcher):
                 if name in bookmakers:
                     bookmaker_odds = []
                     for index in range(1, 4):
-                        fraction = [int(x) for x in tds[index].text.split("/")]
+                        fraction = [
+                            float(x) for x in tds[index].text.split("/")
+                        ]
                         odds_number = 1.0 + (fraction[0] / fraction[1])
                         bookmaker_odds.append(odds_number)
                     bookmaker_odds_tuple = (
