@@ -51,6 +51,7 @@ docgen:
   stage: stats
   tags: [docker]
   script:
+    - pip3 install xvfbwrapper
     - sphinx-docgen
 
 deploy_app:
