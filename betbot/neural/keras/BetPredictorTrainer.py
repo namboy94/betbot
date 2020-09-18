@@ -47,7 +47,6 @@ class BetPredictorTrainer(Trainer):
         for i, expected in enumerate(expected_output):
             predicted = [float(round(x)) for x in predictions[i]]
 
-            print(f"{predicted}|{expected}|{predictions[i]}")
             if int(predicted[0]) == int(predicted[1]):
                 draws += 1
 
@@ -72,7 +71,11 @@ class BetPredictorTrainer(Trainer):
 
         score = points / len(predictions)
         accuracy = 100 * score / 15
-        print(f"Winner Accuracy: {100 * correct_winners / len(predictions)}%")
-        print(f"Correct Accuracy: {100 * correct_results / len(predictions)}%")
-        print(f"Draw Percentage: {100 * draws / len(predictions)}%")
+        self.logger.info(f"Winner Accuracy: "
+                         f"{100 * correct_winners / len(predictions)}%")
+        self.logger.info(f"Correct Accuracy: "
+                         f"{100 * correct_results / len(predictions)}%")
+        self.logger.info(f"Draw Percentage: "
+                         f"{100 * draws / len(predictions)}%")
+        self.logger.info(f"Average Points: {score} ({accuracy}%)")
         return score, accuracy

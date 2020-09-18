@@ -40,7 +40,7 @@ class TableHistoryNNPredictor(Predictor):
         super().__init__()
         self.model_data_path = os.path.join(self.model_dir, self.name())
         trainer = MatchHistoryTrainer(self.model_data_path)
-        self.model = trainer.load_trained_model(minimum_accuracy=41.0)
+        self.model = trainer.load_trained_model(minimum_accuracy=41.5)
 
     @classmethod
     def name(cls) -> str:
