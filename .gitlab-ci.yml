@@ -6,7 +6,7 @@ stages:
   - release
 
 default:
-  image: namboy94/ci-docker-environment:0.10.0
+  image: namboy94/ci-docker-environment:0.11.0
   before_script:
     - echo "$SERVER_ACCESS_KEY" > ~/.ssh/id_rsa
     - chmod 0600 ~/.ssh/id_rsa
@@ -33,7 +33,7 @@ unittest:
   tags: [docker]
   only: [master, develop]
   script:
-    - python-unittest
+    - xvfb-run python-unittest
 
 type_check:
   stage: test
