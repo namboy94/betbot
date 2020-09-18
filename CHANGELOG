@@ -1,3 +1,5 @@
+V 0.5.2:
+  - Fixed oddsportal int conversion issues
 V 0.5.1:
   - Fixed xvfb-related issues
 V 0.5.0:
