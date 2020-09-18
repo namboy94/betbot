@@ -64,17 +64,14 @@ class TableHistoryNNPredictor(Predictor):
         ).tolist()
 
         match_id_info = {}
-        for match in matches:
+        for api_match in matches:
             home_team = abbreviations_to_football_data.get(
-                match.home_team, match.home_team
+                api_match.home_team, api_match.home_team
             )
             away_team = abbreviations_to_football_data.get(
-                match.away_team, match.away_team
+                api_match.away_team, api_match.away_team
             )
-            match_id_info[(home_team, away_team)] = match.id
-
-        from pprint import pprint
-        pprint(match_id_info)
+            match_id_info[(home_team, away_team)] = api_match.id
 
         for i, (input_vector, match) in enumerate(vector_data):
             result = [int(round(x)) for x in predictions[i]]

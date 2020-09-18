@@ -55,7 +55,7 @@ class DataFetcher:
             self.data = self.load()
             self.save(self.data_file)
 
-    def load(self) -> Dict[str, Dict[int, Dict[int, Dict[str, str]]]]:
+    def load(self) -> Dict[str, Dict[int, Dict[int, List[Dict[str, str]]]]]:
         """
         Loads the match data from the internet
         :return: The data as dictionaries representing matches,

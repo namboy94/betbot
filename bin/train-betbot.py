@@ -48,11 +48,11 @@ def main(args: argparse.Namespace):
     if args.refresh_training_data:
         trainer.load_training_data(True)
 
-    def gen_model(h, o, l):
+    def gen_model(h, o, layers):
         h_size = len(InputVector.legend()) - 10
 
         h_ls = []
-        for i in range(l):
+        for i in range(layers):
             h_ls.append(Dense(h_size, activation=h))
 
         return Sequential([
@@ -64,14 +64,16 @@ def main(args: argparse.Namespace):
     custom_models = [
         (lambda: gen_model("sigmoid", "relu", 1), "sigmoid-relu1"),
         (lambda: gen_model("sigmoid", "linear", 1), "sigmoid-linear1"),
-        (lambda: gen_model("sigmoid", "exponential", 1), "sigmoid-exponential1"),
+        (lambda: gen_model("sigmoid", "exponential", 1),
+         "sigmoid-exponential1"),
         (lambda: gen_model("linear", "linear", 1), "linear-linear1"),
         (lambda: gen_model("relu", "relu", 1), "relu-relu1"),
         (lambda: gen_model("relu", "exponential", 1), "relu-exponential1"),
         (lambda: gen_model("exponential", "exponential", 1), "expo-expo1"),
         (lambda: gen_model("sigmoid", "relu", 2), "sigmoid-relu2"),
         (lambda: gen_model("sigmoid", "linear", 2), "sigmoid-linear2"),
-        (lambda: gen_model("sigmoid", "exponential", 2), "sigmoid-exponential2"),
+        (lambda: gen_model("sigmoid", "exponential", 2),
+         "sigmoid-exponential2"),
         (lambda: gen_model("linear", "linear", 2), "linear-linear2"),
         (lambda: gen_model("relu", "relu", 2), "relu-relu2"),
         (lambda: gen_model("relu", "exponential", 2), "relu-exponential2"),
@@ -101,7 +103,7 @@ def main(args: argparse.Namespace):
 
             trainer.name = name
             try:
-                model, score, accuracy, avg_score, avg_accuracy = trainer.train(
+                model, score, accuracy, avg_score, avg_acc = trainer.train(
                     args.iterations,
                     args.epochs,
                     args.batch_size,
@@ -109,13 +111,12 @@ def main(args: argparse.Namespace):
                     custom_compile_fn=custom_compilation[0]
                 )
             except ValueError as e:
-                raise e
                 print(f"Failed to train {name}")
                 continue
             print(f"Best Score: {score}, "
                   f"Best Accuracy: {accuracy:.2f}%")
             print(f"Average Score: {avg_score}, "
-                  f"Average Accuracy: {avg_accuracy:.2f}%")
+                  f"Average Accuracy: {avg_acc:.2f}%")
             name = f"[{avg_score:.2f}][{score:.2f}] {name}"
             model.save(os.path.join(args.output_dir, name))
 

@@ -39,7 +39,7 @@ class Match:
     away_ht_score: Optional[int]
     home_ft_score: Optional[int]
     away_ft_score: Optional[int]
-    bet_odds: Optional[Dict[Bookmakers, Tuple[float, float, float]]]
+    bet_odds: Dict[Bookmakers, Tuple[float, float, float]]
 
     @classmethod
     def from_football_data(cls, data: Dict[str, str]) -> Optional["Match"]:

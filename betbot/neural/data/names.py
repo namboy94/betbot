@@ -19,10 +19,11 @@ LICENSE"""
 
 oddsportal_to_football_data = {
     "Schalke": "Schalke 04",
-    "Entracht Frankfurt": "Ein Frankfurt",
+    "Eintracht Frankfurt": "Ein Frankfurt",
     "Arminia Bielefeld": "Bielefeld",
     "Hertha Berlin": "Hertha",
-    "B. Monchengladbach": "M'gladbach"
+    "B. Monchengladbach": "M'gladbach",
+    "Bayer Leverkusen": "Leverkusen"
 }
 
 abbreviations_to_football_data = {

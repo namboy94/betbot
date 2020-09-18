@@ -38,7 +38,7 @@ class FootballDataFetcher(DataFetcher):
     Class that uses football-data.org to fetch data
     """
 
-    def load(self) -> Dict[str, Dict[int, Dict[int, Dict[str, str]]]]:
+    def load(self) -> Dict[str, Dict[int, Dict[int, List[Dict[str, str]]]]]:
         """
         Loads the match data from the internet
         :return: The data as dictionaries representing matches,
@@ -46,7 +46,7 @@ class FootballDataFetcher(DataFetcher):
         """
         csv_urls = self._load_csv_urls()
         self.logger.info("Loaded all CSV URLs")
-        loaded = {}
+        loaded: Dict[str, Dict[int, Dict[int, List[Dict[str, str]]]]] = {}
         for country, leagues in csv_urls.items():
             loaded[country] = {}
             for league, seasons in leagues.items():
@@ -91,6 +91,9 @@ class FootballDataFetcher(DataFetcher):
                 if len(home_history) < 34 or len(away_history) < 34:
                     continue  # Minimum history of 34 matches
 
+                assert match.home_ft_score is not None
+                assert match.away_ft_score is not None
+
                 input_vector = InputVector.from_data(
                     match, home_history, away_history
                 )
@@ -122,31 +125,47 @@ class FootballDataFetcher(DataFetcher):
         current_season = max(csv_urls[country][league].keys())
         now_url = "https://www.football-data.co.uk/matches.php"
         current_url = csv_urls[country][league][current_season]
+        lower_url = csv_urls[country][league + 1][current_season]
         previous_url = csv_urls[country][league][current_season - 1]
+        previous_lower_url = csv_urls[country][league + 1][current_season - 1]
 
         current_data = self._load_csv_data(
             country, league, current_season, current_url
         )
+        lower_data = self._load_csv_data(
+            country, league + 1, current_season, lower_url
+        )
         previous_data = self._load_csv_data(
             country, league, current_season - 1, previous_url
+        )
+        previous_lower_league_data = self._load_csv_data(
+            country, league + 1, current_season - 1, previous_lower_url
         )
 
         with StringIO(requests.get(now_url).text) as f:
             data = [x for x in csv.reader(f)]
         keys = data.pop(0)
-        current_matches = [
+        _current_matches = [
             Match.from_football_data(
                 {keys[j]: data[i][j] for j in range(len(data))}
             )
             for i in range(len(keys))
             if data[i][0] == league_identifier
         ]
+        current_matches = [x for x in _current_matches if x is not None]
         if len(current_matches) == 0:
             current_matches = self.load_oddsportal_matches()
 
-        all_matches = current_matches + [
-            Match.from_football_data(x) for x in current_data + previous_data
+        _all_matches = [
+            Match.from_football_data(x)
+            for x in
+            current_data +
+            lower_data +
+            previous_data +
+            previous_lower_league_data
         ]
+        all_matches = current_matches + \
+            [x for x in _all_matches if x is not None]
         all_matches.sort(key=lambda x: x.date, reverse=True)
 
         current_matchday = all_matches[0:9]
@@ -154,7 +173,7 @@ class FootballDataFetcher(DataFetcher):
 
         vector_matches = []
         for match in current_matchday:
-            team_history = {}
+            team_history: Dict[str, List[Match]] = {}
             for team in [match.home_team, match.away_team]:
                 team_history[team] = []
                 for other_match in all_matches:
@@ -172,6 +191,10 @@ class FootballDataFetcher(DataFetcher):
 
     @staticmethod
     def load_oddsportal_matches() -> List[Match]:
+        """
+        Loads match data from oddsportal
+        :return: THe match data from oddsportal
+        """
         session = dryscrape.Session()
         headers = {"User-Agent": "Mozilla/5.0"}
         bl_url = "https://www.oddsportal.com/soccer/germany/bundesliga/"
@@ -203,8 +226,8 @@ class FootballDataFetcher(DataFetcher):
             home_team = oddsportal_to_football_data.get(home_team, home_team)
             away_team = oddsportal_to_football_data.get(away_team, away_team)
 
-            date_string = match_soup.find("p", "date").text
-            date = datetime.strptime(date_string, "%A, %d %b %Y, %H:%M")
+            date_string = match_soup.find("p", "date").text.split(", ", 1)[1]
+            date = datetime.strptime(date_string, "%d %b %Y, %H:%M")
 
             odds_table = match_soup.find("table", {"class": "detail-odds"})
             if odds_table is None:
@@ -237,7 +260,8 @@ class FootballDataFetcher(DataFetcher):
                 None, None, None, None,
                 odds
             ))
-        return matches
+        matches.sort(key=lambda x: x.date)
+        return matches[0:9]
 
     def _load_csv_urls(self, limit_by: Optional[List[Countries]] = None) \
             -> Dict[str, Dict[int, Dict[int, str]]]:
@@ -342,7 +366,7 @@ class FootballDataFetcher(DataFetcher):
         Loads all matches segmented by country
         :return: {country: [matches]}
         """
-        all_matches = {}
+        all_matches: Dict[str, List[Match]] = {}
         for country, leagues in self.data.items():
             all_matches[country] = []
             for league, seasons in leagues.items():
@@ -361,7 +385,7 @@ class FootballDataFetcher(DataFetcher):
         :param all_matches: Data on all matches
         :return: The segmented match data
         """
-        matches_by_team = {}
+        matches_by_team: Dict[str, Dict[str, List[Match]]] = {}
         for country, matches in all_matches.items():
             matches_by_team[country] = {}
             teams = []
@@ -375,12 +399,3 @@ class FootballDataFetcher(DataFetcher):
                         matches_by_team[country][team].append(match)
                 matches_by_team[country][team].sort(key=lambda x: x.date)
         return matches_by_team
-
-
-if __name__ == '__main__':
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    fetcher = FootballDataFetcher(False)
-    print("GO!")
-    for m in fetcher.get_current_matchday_vectors(Countries.GERMANY.value, 1):
-        print(m[1])

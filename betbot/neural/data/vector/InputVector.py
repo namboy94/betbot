@@ -70,11 +70,17 @@ class InputVector(Vector):
             for interval in [5, 17, 34]:
                 goals_for = 0
                 goals_against = 0
-                odds_for = {bookmaker: 0 for bookmaker in Bookmakers}
-                odds_against = {bookmaker: 0 for bookmaker in Bookmakers}
-                odds_draw = {bookmaker: 0 for bookmaker in Bookmakers}
+                odds_for = {bookmaker: 0.0 for bookmaker in Bookmakers}
+                odds_against = {bookmaker: 0.0 for bookmaker in Bookmakers}
+                odds_draw = {bookmaker: 0.0 for bookmaker in Bookmakers}
 
                 for history_match in history[0:interval]:
+
+                    if history_match.home_ft_score is None \
+                            or history_match.away_ft_score is None:
+                        interval -= 1
+                        continue
+
                     is_home_team = history_match.home_team == match.home_team
                     if is_home_team:
                         goals_for += history_match.home_ft_score
