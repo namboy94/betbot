@@ -160,7 +160,7 @@ class FootballDataFetcher(DataFetcher):
             match_dict = {keys[i]: item[i] for i in range(len(keys))}
             match_dict.update(base_match_dict)
             match = Match.from_football_data(match_dict)
-            if match is not None:
+            if match is not None and match.date > datetime.utcnow():
                 current_matches.append(match)
 
         if len(current_matches) == 0:
