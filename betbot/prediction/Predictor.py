@@ -18,6 +18,7 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
+import logging
 from typing import List
 from betbot.api.Match import Match
 from betbot.api.Bet import Bet
@@ -32,6 +33,7 @@ class Predictor:
         """
         Initializes the model directory if it does not exist
         """
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.model_dir = os.path.join(
             os.path.expanduser("~"),
             ".config/betbot"

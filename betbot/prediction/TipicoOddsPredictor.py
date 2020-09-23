@@ -17,7 +17,8 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-import requests
+import time
+import dryscrape
 from math import sqrt
 from bs4 import BeautifulSoup
 from typing import List, Tuple
@@ -48,14 +49,20 @@ class TipicoOddsPredictor(Predictor):
         bets = []
 
         for home_team, away_team, home_odds, draw_odds, away_odds in tipico:
+            match_found = False
             for match in matches:
-
                 if home_team == match.home_team \
                         and away_team == match.away_team:
+                    print(match.home_team)
+                    print(match.away_team)
                     bet = self.generate_bet(
                         match.id, home_odds, draw_odds, away_odds
                     )
                     bets.append(bet)
+                    match_found = True
+
+            if not match_found:
+                self.logger.warning(f"Failed to match {home_team}:{away_team}")
 
         return bets
 
@@ -69,11 +76,16 @@ class TipicoOddsPredictor(Predictor):
                     home team name, away team name,
                     home win odds, draw odds, away win odds
         """
+        session = dryscrape.Session()
         tipico_data = []
         url = f"https://s5.sir.sportradar.com/tipico/de/1/season" \
               f"/77189/fixtures/round/21-{matchday}"
-        req = requests.get(url)
-        soup = BeautifulSoup(req.text, "html.parser")
+        session.visit(url)
+        time.sleep(5)
+        body = session.body()
+        with open("x.html", "w") as f:
+            f.write(body)
+        soup = BeautifulSoup(body, "html.parser")
         matches = soup.findAll("tr", {"class": "cursor-pointer"})
         for match in matches:
             names = match.findAll("div", {"class": "wrap"})
@@ -84,16 +96,25 @@ class TipicoOddsPredictor(Predictor):
             draw_odds = float(odds[1].text)
             away_odds = float(odds[2].text)
 
-            translator = {
+            translator = {  # Tipico -> Hk-Tippspiel
                 "ARB": "BIE",
                 "KOE": "FCK",
                 "UNI": "SCU",
-                "WOB": "VFL"
+                "WOB": "VFL",
+                "BSC": "BSC",
+                "SGE": "SGE",
+                "BMG": "BMG",
+                "SCU": "SCU",
+                "SCH": "S04",
+                "BMÜ": "FCB",
+                "LEV": "B04"
             }
             home = translator.get(home, home)
             away = translator.get(away, away)
 
             tipico_data.append((home, away, home_odds, draw_odds, away_odds))
+        from pprint import pprint
+        pprint(tipico_data)
         return tipico_data
 
     # noinspection PyMethodMayBeStatic
