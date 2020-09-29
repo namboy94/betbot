@@ -107,7 +107,8 @@ class TipicoOddsPredictor(Predictor):
                 "SCU": "SCU",
                 "SCH": "S04",
                 "BMÜ": "FCB",
-                "LEV": "B04"
+                "LEV": "B04",
+                "MAI": "M05"
             }
             home = translator.get(home, home)
             away = translator.get(away, away)
