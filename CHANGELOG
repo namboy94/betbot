@@ -1,3 +1,6 @@
+V 0.6.0:
+  - Fixed API issues
+  - Fixed Tipico betting (now uses bwin odds)
 V 0.5.4:
   - Fixed some issues
 V 0.5.3:

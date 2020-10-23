@@ -48,16 +48,21 @@ class Match:
         self.finished = finished
 
     @classmethod
-    def from_json(cls, json_data: Dict[str, Any]):
+    def from_json(
+            cls,
+            json_data: Dict[str, Any],
+            team_data: Dict[int, Dict[str, Any]]
+    ):
         """
         Generates a Match object from JSON data
         :param json_data: The JSON data
+        :param team_data: The JSON data for teams
         :return: The generated Match
         """
         return cls(
             json_data["id"],
             json_data["matchday"],
-            json_data["home_team"]["abbreviation"],
-            json_data["away_team"]["abbreviation"],
+            team_data[json_data["home_team_id"]]["abbreviation"],
+            team_data[json_data["away_team_id"]]["abbreviation"],
             json_data["finished"]
         )

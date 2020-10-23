@@ -45,6 +45,7 @@ class ApiConnection:
         self.url = os.path.join(url, "api/v2") + "/"
         self.api_key = ""
         self.login()
+        self.logger.debug("Initialized")
 
     @property
     def auth_headers(self) -> Dict[str, str]:
@@ -80,6 +81,7 @@ class ApiConnection:
         Checks if the stored API key is valid
         :return: True if valid, False if not (for example because it expired)
         """
+        self.logger.debug("Authorization Check")
         data = self.execute_api_call("authorize", "GET", True)
         return data["status"] == "ok"
 
@@ -88,8 +90,15 @@ class ApiConnection:
         Retrieves a list of matches for the current matchday
         :return: The list of matches
         """
-        data = self.execute_api_call("match?matchday=-1", "GET", True)
-        return [Match.from_json(x) for x in data["data"]["matches"]]
+        self.logger.debug("Getting current matches")
+        match_data = self.execute_api_call(
+            "match?matchday=-1", "GET", True
+        )["data"]["matches"]
+        team_data = self.execute_api_call(
+            "team", "GET", True
+        )["data"]["teams"]
+        team_mapping = {x["id"]: x for x in team_data}
+        return [Match.from_json(x, team_mapping) for x in match_data]
 
     def place_bets(self, bets: List[Bet]):
         """

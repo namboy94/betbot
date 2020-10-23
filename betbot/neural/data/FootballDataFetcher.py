@@ -125,7 +125,7 @@ class FootballDataFetcher(DataFetcher):
 
         csv_urls = self._load_csv_urls([country_enum])
         current_season = max(csv_urls[country][league].keys())
-        now_url = "https://www.football-data.co.uk/fixtures.csv"
+        now_url = "http://www.football-data.co.uk/fixtures.csv"
         current_url = csv_urls[country][league][current_season]
         lower_url = csv_urls[country][league + 1][current_season]
         previous_url = csv_urls[country][league][current_season - 1]
@@ -304,7 +304,7 @@ class FootballDataFetcher(DataFetcher):
             limit_by = [x for x in Countries]
         countries = [x.value for x in limit_by]
 
-        base_url = "https://www.football-data.co.uk/"
+        base_url = "http://www.football-data.co.uk/"
         csv_urls: Dict[str, Dict[int, Dict[int, str]]] = {}
         for country in countries:
             self.logger.info(f"Loading CSV URLs for {country}")
