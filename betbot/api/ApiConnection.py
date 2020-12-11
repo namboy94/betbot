@@ -72,9 +72,20 @@ class ApiConnection:
                 api_key = data["data"]["api_key"]
                 encoded = b64encode(api_key.encode("utf-8"))
                 self.api_key = encoded.decode("utf-8")
+                self.logger.info("Login successful")
                 return True
         else:
             return True
+
+    def logout(self):
+        """
+        Logs out the bot by deleting the API key
+        :return: None
+        """
+        self.execute_api_call(
+            "key", "DELETE", json_data={"api_key": self.api_key}
+        )
+        self.logger.info("Loggin out.")
 
     def authorized(self) -> bool:
         """

@@ -11,4 +11,4 @@ RUN cd bot && python3 setup.py install
 RUN mkdir -p /root/.config/betbot && cp -r bot/models/* /root/.config/betbot
 
 WORKDIR bot
-CMD ["docker_start.sh", "-v"]
+CMD ["docker_start.sh", "-v", "--loop"]

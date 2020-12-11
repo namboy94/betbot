@@ -31,7 +31,13 @@ def main(args: argparse.Namespace):
     :param args: The command line arguments
     :return: None
     """
-    betbot_main(args.predictor, args.username, args.password, args.url)
+    betbot_main(
+        args.predictor,
+        args.username,
+        args.password,
+        args.url,
+        args.loop
+    )
 
 
 if __name__ == "__main__":
@@ -41,7 +47,9 @@ if __name__ == "__main__":
     parser.add_argument("predictor", choices=predictor_names)
     parser.add_argument("username")
     parser.add_argument("password")
-    parser.add_argument("url", default="https://hk-tippspiel.com")
+    parser.add_argument("--url", default="https://hk-tippspiel.com")
+    parser.add_argument("--loop", action="store_true",
+                        help="Place bets once an hour")
 
     argparse_add_verbosity(parser)
     cli_start(main, parser, "Thanks for using betbot", "betbot", sentry_dsn)

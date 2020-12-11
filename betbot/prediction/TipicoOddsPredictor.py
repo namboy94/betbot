@@ -79,7 +79,11 @@ class TipicoOddsPredictor(Predictor):
         data = []
 
         for match in matches:
-            odds = match.bet_odds[Bookmakers.BWIN]
+            odds = match.bet_odds.get(Bookmakers.WILLIAM_HILL)
+
+            if odds is None:
+                continue
+
             home_team = abbrev_map[oddsportal_to_football_data.get(
                 match.home_team, match.home_team
             )]
