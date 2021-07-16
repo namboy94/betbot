@@ -33,7 +33,7 @@ class HomeTeamPredictor(Predictor):
         """
         :return: The name of the predictor
         """
-        return "hometeam"
+        return "home-team"
 
     def predict(self, matches: List[Match]) -> List[Bet]:
         """

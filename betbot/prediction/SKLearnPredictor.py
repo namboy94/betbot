@@ -18,7 +18,9 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 import os
-from typing import List, Tuple, Dict, Union, Optional
+from typing import List, Tuple, Dict, Union, Optional, Any
+
+from betbot.data.OddsPortal import OddsPortal
 from joblib import load, dump
 from numpy import ndarray, array, concatenate
 from betbot.api.Bet import Bet
@@ -45,17 +47,34 @@ class SKLearnPredictor(Predictor):
         :param season: The season for which to predict matches
         """
         super().__init__(api, league, season)
+        self.__odds: \
+            Optional[Dict[Tuple[str, str], Tuple[float, float, float]]] = None
         self.model_path = os.path.join(self.model_dir, self.name() + ".model")
         self.history_path = os.path.join(self.model_dir, "history")
         self.fetcher = FootballDataUk(self.history_path)
         os.makedirs(self.history_path, exist_ok=True)
 
         if not os.path.isfile(self.model_path):
-            self.model = {}
+            self.model: Dict[str, Any] = {}
+            self.logger.info("Training model")
             self.train()
             dump(self.model, self.model_path)
         else:
             self.model = load(self.model_path)
+
+    @property
+    def odds(self) -> Dict[Tuple[str, str], Tuple[float, float, float]]:
+        """
+        Retrieves current odds using a mix of football-data.co.uk and
+        oddsportal.com
+        :return: The odds for each match in the selected league
+        """
+        if self.__odds is None:
+            self.__odds = self.fetcher.get_odds()
+            if len(self.__odds) < 9:
+                oddsportal = OddsPortal()
+                self.__odds.update(oddsportal.get_odds(self.league))
+        return self.__odds
 
     @classmethod
     def regressor(cls) -> MLPRegressor:
@@ -101,9 +120,9 @@ class SKLearnPredictor(Predictor):
             match_data["home_team"], match_data["away_team"]
         ]).toarray()
         odds = array([
-            1 / match_data["interwetten_home"],
-            1 / match_data["interwetten_draw"],
-            1 / match_data["interwetten_away"],
+            1 / float(match_data["home_odds"]),
+            1 / float(match_data["draw_odds"]),
+            1 / float(match_data["away_odds"]),
         ])
         return concatenate((home, away, odds))
 
@@ -115,16 +134,16 @@ class SKLearnPredictor(Predictor):
                  if no prediction took place
         """
         match_tuple = (match.home_team, match.away_team)
-        odds = self.fetcher.get_odds().get(match_tuple)
+        odds = self.odds.get(match_tuple)
         if odds is None:
-            return
+            return None
 
-        match_data = {
+        match_data: Dict[str, Union[str, float]] = {
             "home_team": match.home_team,
             "away_team": match.away_team,
-            "interwetten_home": odds[0],
-            "interwetten_away": odds[1],
-            "interwetten_draw": odds[2]
+            "home_odds": float(odds[0]),
+            "draw_odds": float(odds[1]),
+            "away_odds": float(odds[2])
         }
         vector = array([self.vectorize(match_data)])
         results = self.model["regressor"].predict(vector)[0]

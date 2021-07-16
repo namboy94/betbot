@@ -144,9 +144,10 @@ class ApiConnection:
                              f"{bet.match.home_team} VS {bet.match.away_team}:"
                              f" {bet.home_score}:{bet.away_score}")
 
-        bets = [bet.to_dict() for bet in bets]
-
-        data = self.execute_api_call("place_bets", "PUT", True, {"bets": bets})
+        bet_dicts = [bet.to_dict() for bet in bets]
+        data = self.execute_api_call(
+            "place_bets", "PUT", True, {"bets": bet_dicts}
+        )
         if data["status"] != "ok":
             self.logger.error("Failed to place bets")
         else:

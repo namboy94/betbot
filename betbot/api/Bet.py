@@ -17,8 +17,7 @@ You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
-from typing import Dict
-
+from typing import Dict, Union
 from betbot.api.Match import Match
 
 
@@ -38,9 +37,9 @@ class Bet:
         self.home_score = home_score
         self.away_score = away_score
 
-    def to_dict(self) -> Dict[str, int]:
+    def to_dict(self) -> Dict[str, Union[int, str]]:
         """
-        :return: A dictionary that canbe used to place the bet using the API
+        :return: A dictionary that can be used to place the bet using the API
         """
         return {
             "league": self.match.league,

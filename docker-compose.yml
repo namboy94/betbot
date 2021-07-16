@@ -5,4 +5,4 @@ services:
     image: "betbot"
     container_name: "betbot"
     env_file: .env
-    restart: always
+    restart: unless-stopped

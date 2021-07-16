@@ -113,11 +113,11 @@ class FootballDataUk:
         :param data_file: The path to the CSV file
         :return: The match data
         """
-        matches = []
+        matches: List[Dict[str, Union[str, int, float]]] = []
         file_matches = self.load_history_file(data_file)
         for match in file_matches:
-            home = self.TEAM_MAP.get(match["HomeTeam"])
-            away = self.TEAM_MAP.get(match["AwayTeam"])
+            home = self.TEAM_MAP.get(str(match["HomeTeam"]))
+            away = self.TEAM_MAP.get(str(match["AwayTeam"]))
             if home is None or away is None:
                 continue
             try:
@@ -135,8 +135,7 @@ class FootballDataUk:
         return matches
 
     @staticmethod
-    def load_history_file(history_file: str) \
-            -> List[Dict[str, Union[str, int, float]]]:
+    def load_history_file(history_file: str) -> List[Dict[str, str]]:
         """
         Loads the contents of a history file
         :param history_file: The history file to load
@@ -145,7 +144,7 @@ class FootballDataUk:
         with open(history_file, "r", encoding="latin1") as f:
             lines = [x for x in csv.reader(f)]
         header = lines.pop(0)
-        data = []
+        data: List[Dict[str, str]] = []
         for line in lines:
             item = {}
             for i, key in enumerate(header):
@@ -158,7 +157,7 @@ class FootballDataUk:
     def get_odds(self) -> Dict[Tuple[str, str], Tuple[float, float, float]]:
         """
         Loads currently available odds
-        :return: The current odds (home, away, draw) mapped to home/away teams
+        :return: The current odds (home, draw, away) mapped to home/away teams
         """
         path = "/tmp/fixtures.csv"
         url = "https://www.football-data.co.uk/fixtures.csv"
@@ -170,8 +169,8 @@ class FootballDataUk:
             match_tuple = (str(match["home_team"]), str(match["away_team"]))
             odds_tuple = (
                 float(match["home_odds"]),
-                float(match["away_odds"]),
-                float(match["draw_odds"])
+                float(match["draw_odds"]),
+                float(match["away_odds"])
             )
             odds[match_tuple] = odds_tuple
         return odds

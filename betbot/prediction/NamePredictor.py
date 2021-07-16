@@ -78,7 +78,7 @@ class NamePredictor(SKLearnPredictor):
         :return: The home goals and away goals or None
                  if no prediction took place
         """
-        match_data = {
+        match_data: Dict[str, Union[str, float]] = {
             "home_team": match.home_team,
             "away_team": match.away_team
         }

@@ -35,7 +35,7 @@ class BettingOddsPredictor(Predictor):
         """
         :return: The name of the predictor
         """
-        return "tipico-odds"
+        return "betting-odds"
 
     def predict(self, matches: List[Match]) -> List[Bet]:
         """
@@ -59,14 +59,14 @@ class BettingOddsPredictor(Predictor):
     def generate_scores(
             self,
             home_odds: float,
-            away_odds: float,
-            draw_odds: float
+            draw_odds: float,
+            away_odds: float
     ) -> Tuple[int, int]:
         """
         Generates a scoreline based on the quote data
         :param home_odds: The odds that the home team wins
-        :param away_odds: The odds that the away team wins
         :param draw_odds: The odds that the match ends in a draw
+        :param away_odds: The odds that the away team wins
         :return: The generated bet
         """
         winner = int(sqrt(abs(home_odds - away_odds) * 2))

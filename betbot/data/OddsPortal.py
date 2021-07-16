@@ -79,9 +79,9 @@ class OddsPortal:
         """
         Retrieves the odds for upcoming matches from oddsportal.com
         :param league: The league to search for
-        :return: Odds for the matches
+        :return: Odds for the matches (home, draw, odds)
         """
-        matches = {}
+        matches: Dict[Tuple[str, str], Tuple[float, float, float]] = {}
         base_url = "https://www.oddsportal.com/soccer/"
         endpoint = {
             "bl1": "germany/bundesliga/",
@@ -108,8 +108,8 @@ class OddsPortal:
             try:
                 matches[match_tuple] = (
                     float(odds[0].text),
-                    float(odds[2].text),
-                    float(odds[1].text)
+                    float(odds[1].text),
+                    float(odds[2].text)
                 )
             except ValueError:
                 continue
