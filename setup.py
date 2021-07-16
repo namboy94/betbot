@@ -43,8 +43,9 @@ if __name__ == "__main__":
             "requests",
             "beautifulsoup4",
             "puffotter",
-            "tensorflow>=2.0.0",
-            "dryscrape"
+            "scikit-learn",
+            "joblib",
+            "selenium"
         ],
         include_package_data=True,
         zip_safe=False

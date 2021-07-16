@@ -3,12 +3,16 @@ MAINTAINER Hermann Krumrey <hermann@krumreyh.com>
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y python3 python3-pip qt5-default libqt5webkit5-dev xvfb python3-lxml
-RUN pip3 install tensorflow keras dryscrape
+RUN apt update && apt install -y python3 python3-pip wget firefox
+RUN pip3 install scikit-learn selenium
+
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.29.1/geckodriver-v0.29.1-linux32.tar.gz &&\
+    tar -xvzf geckodriver* &&\
+    chmod +x geckodriver &&\
+    mv geckodriver /usr/local/bin/
 
 ADD . bot
 RUN cd bot && python3 setup.py install
-RUN mkdir -p /root/.config/betbot && cp -r bot/models/* /root/.config/betbot
 
 WORKDIR bot
-CMD ["docker_start.sh", "-v"]
+CMD ["multi-betbot", "-v", "--loop"]

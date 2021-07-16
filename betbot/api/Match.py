@@ -27,7 +27,8 @@ class Match:
 
     def __init__(
             self,
-            _id: int,
+            league: str,
+            season: str,
             matchday: int,
             home_team: str,
             away_team: str,
@@ -41,23 +42,28 @@ class Match:
         :param away_team: The name of the away team
         :param finished: Whether the match is already finished or not
         """
-        self.id = _id
+        self.league = league
+        self.season = season
         self.matchday = matchday
         self.home_team = home_team
         self.away_team = away_team
         self.finished = finished
 
     @classmethod
-    def from_json(cls, json_data: Dict[str, Any]):
+    def from_json(
+            cls,
+            json_data: Dict[str, Any]
+    ):
         """
         Generates a Match object from JSON data
         :param json_data: The JSON data
         :return: The generated Match
         """
         return cls(
-            json_data["id"],
+            json_data["league"],
+            json_data["season"],
             json_data["matchday"],
-            json_data["home_team"]["abbreviation"],
-            json_data["away_team"]["abbreviation"],
+            json_data["home_team_abbreviation"],
+            json_data["away_team_abbreviation"],
             json_data["finished"]
         )
