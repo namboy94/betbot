@@ -51,6 +51,7 @@ docgen:
   stage: stats
   tags: [docker]
   script:
+    - pip install cryptography --upgrade
     - sphinx-docgen
 
 deploy_app:
