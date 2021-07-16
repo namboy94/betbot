@@ -163,9 +163,7 @@ class SKLearnPredictor(Predictor):
         :param away_score: The away score to encode
         :return: The encoded result vector
         """
-        encoded_home_score = 1 if home_score == 0 else 1 / (home_score + 1)
-        encoded_away_score = 1 if away_score == 0 else 1 / (away_score + 1)
-        return array([encoded_home_score, encoded_away_score])
+        return array([home_score, away_score])
 
     # noinspection PyMethodMayBeStatic
     def interpret_results(self, home_result: float, away_result: float) -> \
@@ -176,13 +174,7 @@ class SKLearnPredictor(Predictor):
         :param away_result: The away goals result
         :return: The home goals, the away goals
         """
-        home_converted = (1 / home_result) - 1
-        away_converted = (1 / away_result) - 1
-        min_score = min([home_converted, away_converted])
-        normer = round(min_score)
-        home_score = round(home_converted - min_score + normer)
-        away_score = round(away_converted - min_score + normer)
-        return home_score, away_score
+        return round(home_result), round(away_result)
 
     def predict(self, matches: List[Match]) -> List[Bet]:
         """

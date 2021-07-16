@@ -37,6 +37,19 @@ class NamePredictor(SKLearnPredictor):
         return "name-only"
 
     # noinspection PyMethodMayBeStatic
+    def encode_result(self, home_score: int, away_score: int) -> ndarray:
+        """
+        Encodes a result vector
+        This is done as a normalization step.
+        :param home_score: The home score to encode
+        :param away_score: The away score to encode
+        :return: The encoded result vector
+        """
+        encoded_home_score = 1 if home_score == 0 else 1 / (home_score + 1)
+        encoded_away_score = 1 if away_score == 0 else 1 / (away_score + 1)
+        return array([encoded_home_score, encoded_away_score])
+
+    # noinspection PyMethodMayBeStatic
     def interpret_results(self, home_result: float, away_result: float) -> \
             Tuple[int, int]:
         """
