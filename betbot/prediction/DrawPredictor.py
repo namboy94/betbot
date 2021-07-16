@@ -44,6 +44,6 @@ class DrawPredictor(Predictor):
         """
         bets = []
         for match in matches:
-            goals = random.randint(0, 3)
-            bets.append(Bet(match.id, goals, goals))
+            goals = random.randint(0, 2)
+            bets.append(Bet(match, goals, goals))
         return bets

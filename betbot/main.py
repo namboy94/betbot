@@ -45,16 +45,24 @@ def main(
     logging.info(f"Starting betbot for predictor {predictor_name} "
                  f"and user {username}@{url}")
 
+    api = ApiConnection(username, password, url)
+
+    if not api.authorized():
+        return
+
     predictor_map = {
         x.name(): x for x in predictors
     }
-    predictor = predictor_map[predictor_name]()
-    api = ApiConnection(username, password, url)
+    predictor_cls = predictor_map[predictor_name]
 
     while True:
-        matches = api.get_current_matchday_matches()
-        bets = predictor.predict(matches)
-        api.place_bets(bets)
+        leagues = api.get_active_leagues()
+        for league, season in leagues:
+            logging.info(f"Placing bets for league {league}/{season}")
+            predictor = predictor_cls(api, league, season)
+            matches = api.get_current_matchday_matches(league, season)
+            bets = predictor.predict(matches)
+            api.place_bets(bets)
 
         if loop:
             time.sleep(60 * 60)

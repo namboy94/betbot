@@ -16,3 +16,18 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
+
+from betbot.prediction.SKLearnPredictor import SKLearnPredictor
+
+
+class NameAndOddsPredictor(SKLearnPredictor):
+    """
+    scikit-learn powered predictor that uses the name and betting odds
+    """
+
+    @classmethod
+    def name(cls) -> str:
+        """
+        :return: The name of the predictor
+        """
+        return "name-and-odds"

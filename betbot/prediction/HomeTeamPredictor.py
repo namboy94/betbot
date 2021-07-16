@@ -18,23 +18,30 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import List
+from betbot.api.Bet import Bet
+from betbot.api.Match import Match
+from betbot.prediction.Predictor import Predictor
 
 
-class Vector:
+class HomeTeamPredictor(Predictor):
     """
-    Class that models a vector
+    Class that always predicts 2:1 for the home team
     """
-
-    @property
-    def vector(self) -> List[float]:
-        """
-        :return: The vector as a list of float values
-        """
-        raise NotImplementedError()
 
     @classmethod
-    def legend(cls) -> List[str]:
+    def name(cls) -> str:
         """
-        :return: Strings describing the individual parts of the vectors
+        :return: The name of the predictor
         """
-        raise NotImplementedError()
+        return "hometeam"
+
+    def predict(self, matches: List[Match]) -> List[Bet]:
+        """
+        Performs the prediction
+        :param matches: The matches to predict
+        :return: The predictions as Bet objects
+        """
+        bets = []
+        for match in matches:
+            bets.append(Bet(match, 2, 1))
+        return bets

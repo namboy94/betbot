@@ -18,15 +18,21 @@ along with betbot.  If not, see <http://www.gnu.org/licenses/>.
 LICENSE"""
 
 from typing import Type, List
-from betbot.prediction.MatchHistoryNNPredictor import TableHistoryNNPredictor
 from betbot.prediction.Predictor import Predictor
 from betbot.prediction.DrawPredictor import DrawPredictor
 from betbot.prediction.RandomPredictor import RandomPredictor
-from betbot.prediction.TipicoOddsPredictor import TipicoOddsPredictor
+from betbot.prediction.BettingOddsPredictor import BettingOddsPredictor
+from betbot.prediction.LeagueTablePredictor import LeagueTablePredictor
+from betbot.prediction.HomeTeamPredictor import HomeTeamPredictor
+from betbot.prediction.NamePredictor import NamePredictor
+from betbot.prediction.NameAndOddsPredictor import NameAndOddsPredictor
 
 predictors: List[Type[Predictor]] = [
     DrawPredictor,
     RandomPredictor,
-    TipicoOddsPredictor,
-    TableHistoryNNPredictor
+    BettingOddsPredictor,
+    LeagueTablePredictor,
+    HomeTeamPredictor,
+    NameAndOddsPredictor,
+    NamePredictor
 ]

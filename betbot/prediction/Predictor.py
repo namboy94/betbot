@@ -20,6 +20,7 @@ LICENSE"""
 import os
 import logging
 from typing import List
+from betbot.api.ApiConnection import ApiConnection
 from betbot.api.Match import Match
 from betbot.api.Bet import Bet
 
@@ -29,10 +30,16 @@ class Predictor:
     Class that specifies required methods for predictor objects
     """
 
-    def __init__(self):
+    def __init__(self, api: ApiConnection, league: str, season: int):
         """
         Initializes the model directory if it does not exist
+        :param api: The bundesliga-tippspiel API connection
+        :param league: The league for which to predict matches
+        :param season: The season for which to predict matches
         """
+        self.api = api
+        self.league = league
+        self.season = season
         self.logger = logging.getLogger(self.__class__.__name__)
         self.model_dir = os.path.join(
             os.path.expanduser("~"),
