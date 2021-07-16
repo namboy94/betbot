@@ -21,7 +21,7 @@ import os
 import json
 import requests
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 from base64 import b64encode
 from betbot.api.Bet import Bet
 from betbot.api.Match import Match
@@ -42,7 +42,7 @@ class ApiConnection:
         self.logger = logging.getLogger(__name__)
         self.username = username
         self.password = password
-        self.url = os.path.join(url, "api/v2") + "/"
+        self.url = os.path.join(url, "api/v3") + "/"
         self.api_key = ""
         self.login()
         self.logger.debug("Initialized")
@@ -77,16 +77,6 @@ class ApiConnection:
         else:
             return True
 
-    def logout(self):
-        """
-        Logs out the bot by deleting the API key
-        :return: None
-        """
-        self.execute_api_call(
-            "key", "DELETE", json_data={"api_key": self.api_key}
-        )
-        self.logger.info("Loggin out.")
-
     def authorized(self) -> bool:
         """
         Checks if the stored API key is valid
@@ -96,20 +86,52 @@ class ApiConnection:
         data = self.execute_api_call("authorize", "GET", True)
         return data["status"] == "ok"
 
-    def get_current_matchday_matches(self) -> List[Match]:
+    def logout(self):
+        """
+        Logs out the bot by deleting the API key
+        :return: None
+        """
+        self.execute_api_call(
+            "key", "DELETE", json_data={"api_key": self.api_key}
+        )
+        self.logger.info("Logging out.")
+
+    def get_active_leagues(self) -> List[Tuple[str, int]]:
+        """
+        :return: A list of tuples of leagues and seasons of active leagues
+        """
+        leagues = self.execute_api_call(
+            "leagues", "GET", True
+        )["data"]["leagues"]
+        newest_season = max([x[1] for x in leagues])
+        return [x for x in leagues if x[1] == newest_season]
+
+    def get_league_table(self, season: str, league: int) -> List[str]:
+        """
+        Retrieves the current league table order
+        :param season: The league for which to retrieve the league table
+        :param league: The season for which to retrieve the league table
+        :return: The team abbreviations in order of their league rankings
+        """
+        league_table = self.execute_api_call(
+            f"league_table/{season}/{league}", "GET", True
+        )["data"]["league_table"]
+        return [x[1]["abbreviation"] for x in league_table]
+
+    def get_current_matchday_matches(
+            self, league: str, season: int
+    ) -> List[Match]:
         """
         Retrieves a list of matches for the current matchday
+        :param league: The league to retrieve matches for
+        :param season: The season to retrieve matches for
         :return: The list of matches
         """
         self.logger.debug("Getting current matches")
         match_data = self.execute_api_call(
-            "match?matchday=-1", "GET", True
+            f"matchday/{league}/{season}", "GET", True
         )["data"]["matches"]
-        team_data = self.execute_api_call(
-            "team", "GET", True
-        )["data"]["teams"]
-        team_mapping = {x["id"]: x for x in team_data}
-        return [Match.from_json(x, team_mapping) for x in match_data]
+        return [Match.from_json(x) for x in match_data]
 
     def place_bets(self, bets: List[Bet]):
         """
@@ -117,19 +139,19 @@ class ApiConnection:
         :param bets: The bets to place
         :return: None
         """
-        bet_dict = {}
         for bet in bets:
-            bet_dict.update(bet.to_dict())
-            self.logger.info(f"Generated bet: {bet}")
+            self.logger.info(f"Placing bet: "
+                             f"{bet.match.home_team} VS {bet.match.away_team}:"
+                             f" {bet.home_score}:{bet.away_score}")
 
-        data = self.execute_api_call("bet", "PUT", True, bet_dict)
+        bets = [bet.to_dict() for bet in bets]
+
+        data = self.execute_api_call("place_bets", "PUT", True, {"bets": bets})
         if data["status"] != "ok":
             self.logger.error("Failed to place bets")
         else:
-            new = data["data"]["new"]
-            updated = data["data"]["updated"]
-            self.logger.info(f"Placed bets ({new} new, {updated} updated) "
-                             f"(user:{self.username})")
+            placed = len(data["data"]["placed"])
+            self.logger.info(f"Placed {placed} bets (user:{self.username})")
 
     def execute_api_call(
             self,

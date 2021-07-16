@@ -1,3 +1,7 @@
+V 0.7.0:
+  - Adjusted to new v3 API
+  - Switch to scikit-learn for machine learning
+  - Add more predictors
 V 0.6.0:
   - Fixed API issues
   - Fixed Tipico betting (now uses bwin odds)

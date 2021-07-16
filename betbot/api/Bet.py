@@ -19,20 +19,22 @@ LICENSE"""
 
 from typing import Dict
 
+from betbot.api.Match import Match
+
 
 class Bet:
     """
     Class that encapsulates Bet information
     """
 
-    def __init__(self, match_id: int, home_score: int, away_score: int):
+    def __init__(self, match: Match, home_score: int, away_score: int):
         """
         Initializes the Bet
-        :param match_id: The ID of the associated match
+        :param match: The associated match
         :param home_score: The score bet on the home team
         :param away_score: The score bet on the away team
         """
-        self.match_id = match_id
+        self.match = match
         self.home_score = home_score
         self.away_score = away_score
 
@@ -41,12 +43,11 @@ class Bet:
         :return: A dictionary that canbe used to place the bet using the API
         """
         return {
-            f"{self.match_id}-home": self.home_score,
-            f"{self.match_id}-away": self.away_score
+            "league": self.match.league,
+            "season": self.match.season,
+            "matchday": self.match.matchday,
+            "home_team": self.match.home_team,
+            "away_team": self.match.away_team,
+            "home_score": self.home_score,
+            "away_score": self.away_score
         }
-
-    def __str__(self) -> str:
-        """
-        :return: A string representation of the bet
-        """
-        return f"[{self.match_id}] {self.home_score}:{self.away_score}"
