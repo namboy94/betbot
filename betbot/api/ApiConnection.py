@@ -180,7 +180,6 @@ class ApiConnection:
         if json_data is not None:
             extras["json"] = json_data
 
-        resp = requests.request(
-            method, self.url + endpoint, **extras
-        )  # type: ignore
+        api_url = self.url + endpoint
+        resp = requests.request(method, api_url, **extras)  # type: ignore
         return json.loads(resp.text)
