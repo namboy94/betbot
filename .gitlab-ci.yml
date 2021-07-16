@@ -33,7 +33,7 @@ unittest:
   tags: [docker]
   only: [master, develop]
   script:
-    - xvfb-run python-unittest
+    - python-unittest
 
 type_check:
   stage: test
@@ -51,7 +51,6 @@ docgen:
   stage: stats
   tags: [docker]
   script:
-    - pip3 install xvfbwrapper
     - sphinx-docgen
 
 deploy_app:
