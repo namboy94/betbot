@@ -64,6 +64,26 @@ class OddsPortal:
         "SG Dynamo Dresden": "SGD",
         "Darmstadt": "D98",
         "Sandhausen": "SVS",
+        "VfL Osnabruck": "OSN",
+        "Duisburg": "MSV",
+        "Hallescher": "HFC",
+        "Meppen": "SVM",
+        "Kaiserslautern": "FCK",
+        "Braunschweig": "BRA",
+        "Mannheim": "MAN",
+        "Magdeburg": "FCM",
+        "Munich 1860": "MÜN",
+        "Wurzburger Kickers": "WÜR",
+        "TSV Havelse": "HAV",
+        "Saarbrucken": "FCS",
+        "Zwickau": "ZWI",
+        "Dortmund II": "BV2",
+        "Viktoria Berlin": "VBE",
+        "Viktoria Koln": "VKO",
+        "Verl": "SCV",
+        "Turkgucu Munchen": "TÜR",
+        "Freiburg II": "SC2",
+        "Wehen": "WIE"
     }
 
     def __init__(self):
@@ -85,7 +105,8 @@ class OddsPortal:
         base_url = "https://www.oddsportal.com/soccer/"
         endpoint = {
             "bl1": "germany/bundesliga/",
-            "bl2": "germany/2-bundesliga/"
+            "bl2": "germany/2-bundesliga/",
+            "bl3": "germany/3-liga/"
         }.get(league)
         if endpoint is None:
             return matches
@@ -98,9 +119,13 @@ class OddsPortal:
             if len(participant_tag) == 0:
                 continue
 
-            home_team, away_team = participant_tag[0].text.split(" - ")
-            home_abbrv = self.TEAM_MAP.get(home_team)
-            away_abbrv = self.TEAM_MAP.get(away_team)
+            try:
+                home_team, away_team = participant_tag[0].text.split(" - ")
+            except ValueError:
+                continue
+
+            home_abbrv = self.TEAM_MAP.get(home_team.strip())
+            away_abbrv = self.TEAM_MAP.get(away_team.strip())
             if home_abbrv is None or away_abbrv is None:
                 continue
             match_tuple = (home_abbrv, away_abbrv)
